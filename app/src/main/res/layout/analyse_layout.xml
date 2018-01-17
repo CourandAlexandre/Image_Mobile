@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.54"
+        android:orientation="vertical"
+        tools:content="com.marvl.imt_lille_douai.marvl.controller.MainActivity">
+
+        <LinearLayout
+            android:layout_width="368dp"
+            android:layout_height="495dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/linearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textViewAnalyseResult"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Analysis result" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/imageWebsite"
+                android:layout_width="368dp"
+                android:layout_height="400dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:layout_weight="1"
+                app:layout_constraintBottom_toTopOf="@+id/analyseButton"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+                app:srcCompat="@android:drawable/btn_dialog" />
+
+            <Button
+                android:id="@+id/websiteButton"
+                android:layout_width="368dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"
+                android:text="Go to the website" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
