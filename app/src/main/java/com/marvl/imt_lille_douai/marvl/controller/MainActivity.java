@@ -260,9 +260,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ArrayList<String> classifier = new ArrayList<>();
 
 
-        /*classifier.add("Coca.xml");
+        classifier.add("Coca.xml");
         classifier.add("Pepsi.xml");
-        classifier.add("Sprite.xml");*/
+        classifier.add("Sprite.xml");
 
         /*getIndexJsonServ(new VolleyCallback() {
             @Override
