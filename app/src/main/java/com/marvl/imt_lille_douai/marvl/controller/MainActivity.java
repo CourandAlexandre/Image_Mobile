@@ -33,6 +33,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.marvl.imt_lille_douai.marvl.BuildConfig;
 import com.marvl.imt_lille_douai.marvl.R;
+import com.marvl.imt_lille_douai.marvl.comparison.image.ComparedImage;
 import com.marvl.imt_lille_douai.marvl.comparison.tools.GlobalTools;
 import com.marvl.imt_lille_douai.marvl.comparison.tools.ServerTools;
 import com.marvl.imt_lille_douai.marvl.comparison.tools.SiftTools;
@@ -234,7 +235,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         System.out.println("class1 " + classifiers[1].sizeof());
         System.out.println("class2 " + classifiers[2].sizeof());
 
-        SiftTools.doComparison(this,classifierArray,classifiers);
+        ComparedImage comparedImage = SiftTools.doComparison(this,classifierArray,classifiers);
+
+        System.out.println(comparedImage.getImageName() + "  predicted as " + comparedImage.getBestMatchImage() + " in " + comparedImage.getTimePrediction() + " ms");
+
+        // TODO : renvoi Android vers bouton de la marque du bestMatchImage
 
         /*getIndexJsonServ(new VolleyCallback() {
             @Override
@@ -257,8 +262,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    // TODO : C'est à toi, je pense qu'on peut enlever
     public void addToClassifier(String string) {
-//this.classifier.add(string);
+        //this.classifier.add(string);
     }
 
     // Create an image file name

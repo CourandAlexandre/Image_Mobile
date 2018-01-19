@@ -11,12 +11,10 @@ import android.provider.MediaStore;
 import com.marvl.imt_lille_douai.marvl.comparison.image.ComparedImage;
 
 import static org.bytedeco.javacpp.opencv_highgui.WINDOW_AUTOSIZE;
-//import static org.bytedeco.javacpp.opencv_highgui.imread;
-//import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
+import static org.bytedeco.javacpp.opencv_highgui.imread; //import static org.bytedeco.javacpp.opencv_imgcodecs.imread -> JavaCV 1.3;
 import static org.bytedeco.javacpp.opencv_highgui.imshow;
 import static org.bytedeco.javacpp.opencv_highgui.namedWindow;
 import static org.bytedeco.javacpp.opencv_highgui.waitKey;
-//import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgproc.THRESH_BINARY;
 import static org.bytedeco.javacpp.opencv_imgproc.threshold;
 
@@ -36,26 +34,29 @@ import org.bytedeco.javacpp.opencv_core.Mat;
 
 public class GlobalTools {
 
-    /* public static Mat loadImgLena() {
-        String	imgName	=	"lena.jpg";
-        Mat	image	=	imread(imgName);
+    public static Mat loadImgPlain(String imageName) {
+        Mat	image	=	imread(imageName,-1);
 
-        if	(image.empty())	{
-            throw	new	RuntimeException("cannot	find	img	"	+	imgName	+	"	in	classpath");
-        }
+        if(image.empty()){ throw new RuntimeException("cannot fin img " + imageName + " in classpath");  }
 
         return image;
-    } */
+    }
 
-    /*public static Mat loadImg(String imageName) {
-        Mat	image	=	imread(imageName);
+    public static Mat loadImgGrayscale(String imageName) {
+        Mat image = imread(imageName,0);
 
-        if	(image.empty())	{
-            throw	new	RuntimeException("cannot	find	img	"	+	imageName	+	"	in	classpath");
-        }
+        if(image.empty()){ throw new RuntimeException("cannot fin img " + imageName + " in classpath");  }
 
         return image;
-    }*/
+    }
+
+    public static Mat loadImg3ChannelColor(String imageName) {
+        Mat image = imread(imageName,1);
+
+        if(image.empty()){ throw new RuntimeException("cannot fin img " + imageName + " in classpath");  }
+
+        return image;
+    }
 
     public static Mat loadThresh(Mat image) {
         Mat thresh = new Mat(image.size());
@@ -70,7 +71,7 @@ public class GlobalTools {
         waitKey(0);	// Wait for a keys in the windows
     }
 
-    public static ArrayList<ComparedImage> convertHashMapToArrayListOfComparedImage(HashMap<String, Float> imgValueMap, String pathToDataBank) {
+    /*=public static ArrayList<ComparedImage> convertHashMapToArrayListOfComparedImage(HashMap<String, Float> imgValueMap, String pathToDataBank) {
         ArrayList<ComparedImage> comparedImgArray = new ArrayList<>();
 
         Set<String> imgSet = imgValueMap.keySet();
@@ -89,7 +90,7 @@ public class GlobalTools {
         }
 
         return comparedImgArray;
-    }
+    }*/
 
     public static File toCache(Context context, String Path, String fileName) {
         InputStream input;

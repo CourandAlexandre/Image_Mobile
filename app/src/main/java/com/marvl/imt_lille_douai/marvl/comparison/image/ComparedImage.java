@@ -8,12 +8,22 @@ public class ComparedImage {
     private Float imageDistance;
     private String imageClass;
 
+    private String bestMatchImage;
+    private Long timePrediction;
+
+    /* Old contrstuctor, might be reused
     public ComparedImage(String imageName, Float imageDistance, String pathToDataBank) {
         this.imageName = imageName;
         this.imageDistance = imageDistance;
 
-        String clearImgClass = imageName.replaceAll(pathToDataBank, "");
-        this.imageClass = clearImgClass.substring(0,clearImgClass.indexOf("_"));
+        //String clearImgClass = imageName.replaceAll(pathToDataBank, "");
+        //this.imageClass = clearImgClass.substring(0,clearImgClass.indexOf("_"));
+    } */
+
+    public ComparedImage(String imageName, String bestMatchImage, Long timePrediction){
+        this.imageName = imageName;
+        this.bestMatchImage = bestMatchImage;
+        this.timePrediction = timePrediction;
     }
 
 
@@ -29,6 +39,10 @@ public class ComparedImage {
         return imageClass;
     }
 
+    public String getBestMatchImage() { return bestMatchImage; }
+
+    public Long getTimePrediction() { return timePrediction; }
+
     public void setImageName(String imageName) {
         this.imageName = imageName;
     }
@@ -37,6 +51,8 @@ public class ComparedImage {
         this.imageDistance = imageDistance;
     }
 
+    public void setBestMatchImage(String bestMatchImage) { this.bestMatchImage = bestMatchImage; }
 
+    public void setTimePrediction(Long timePrediction) { this.timePrediction = timePrediction; }
 }
 
