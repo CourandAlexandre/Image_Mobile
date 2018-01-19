@@ -1,10 +1,18 @@
 package com.marvl.imt_lille_douai.marvl.comparison.tools;
 
+import android.content.Context;
+import android.content.res.AssetManager;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.provider.MediaStore;
+
 import com.marvl.imt_lille_douai.marvl.comparison.image.ComparedImage;
 
 import static org.bytedeco.javacpp.opencv_highgui.WINDOW_AUTOSIZE;
 //import static org.bytedeco.javacpp.opencv_highgui.imread;
-import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
+//import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_highgui.imshow;
 import static org.bytedeco.javacpp.opencv_highgui.namedWindow;
 import static org.bytedeco.javacpp.opencv_highgui.waitKey;
@@ -12,17 +20,23 @@ import static org.bytedeco.javacpp.opencv_highgui.waitKey;
 import static org.bytedeco.javacpp.opencv_imgproc.THRESH_BINARY;
 import static org.bytedeco.javacpp.opencv_imgproc.threshold;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_imgcodecs;
+//import org.bytedeco.javacpp.opencv_imgcodecs;
 
 public class GlobalTools {
 
-    public static Mat loadImgLena() {
+    /* public static Mat loadImgLena() {
         String	imgName	=	"lena.jpg";
         Mat	image	=	imread(imgName);
 
@@ -31,9 +45,9 @@ public class GlobalTools {
         }
 
         return image;
-    }
+    } */
 
-    public static Mat loadImg(String imageName) {
+    /*public static Mat loadImg(String imageName) {
         Mat	image	=	imread(imageName);
 
         if	(image.empty())	{
@@ -41,7 +55,7 @@ public class GlobalTools {
         }
 
         return image;
-    }
+    }*/
 
     public static Mat loadThresh(Mat image) {
         Mat thresh = new Mat(image.size());
@@ -75,5 +89,64 @@ public class GlobalTools {
         }
 
         return comparedImgArray;
+    }
+
+    public static File toCache(Context context, String Path, String fileName) {
+        InputStream input;
+        FileOutputStream output;
+        byte[] buffer;
+
+        String filePath = context.getCacheDir() + "/" + fileName;
+        File file = new File(filePath);
+        AssetManager assetManager = context.getAssets();
+
+        try {
+            input = assetManager.open(Path);
+            buffer = new byte[input.available()];
+            input.read(buffer);
+            input.close();
+
+            output = new FileOutputStream(filePath);
+            output.write(buffer);
+            output.close();
+            return file;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String getRealPath(Context context, Uri uri){
+        Cursor cursor;
+
+        String[] projection = {MediaStore.Images.Media.DATA};
+        cursor = context.getContentResolver().query(
+                uri,
+                projection,
+                null,
+                null,
+                null
+        );
+
+        int dataIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+
+        return cursor.getString(dataIndex);
+    }
+
+    public static Bitmap decodeFile(File file){
+        Bitmap bitmap = null;
+
+        try {
+            FileInputStream inputStream = new FileInputStream(file); // System.err
+
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            bitmap = BitmapFactory.decodeStream(inputStream, null, options);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return bitmap;
     }
 }

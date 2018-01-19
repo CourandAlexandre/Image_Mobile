@@ -33,6 +33,9 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.marvl.imt_lille_douai.marvl.BuildConfig;
 import com.marvl.imt_lille_douai.marvl.R;
+import com.marvl.imt_lille_douai.marvl.comparison.tools.GlobalTools;
+import com.marvl.imt_lille_douai.marvl.comparison.tools.ServerTools;
+import com.marvl.imt_lille_douai.marvl.comparison.tools.SiftTools;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -167,10 +170,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     protected void processPhotoLibrary(Intent intent) {
         Uri photoUri = intent.getData();
-        String pathToPhoto = getRealPath(getApplicationContext(), photoUri);
+        String pathToPhoto = GlobalTools.getRealPath(getApplicationContext(), photoUri);
 
         File pathToFile = new File(pathToPhoto);
-        Bitmap photoBitmap = decodeFile(pathToFile); // err -> Maybe on path
+        Bitmap photoBitmap = GlobalTools.decodeFile(pathToFile); // err -> Maybe on path
 
         photoView.setImageBitmap(photoBitmap);
 
@@ -192,13 +195,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // Continue only if the File was successfully created
             if (photoFile != null) {
                 //Uri photoUri = FileProvider.getUriForFile(this,SHARED_PROVIDER_AUTHORITY,photoFile);
-
                 Uri photoUri = FileProvider.getUriForFile(this.getApplicationContext(), "com.marvl.imt_lille_douai.marvl.fileprovider", photoFile);
 
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-
 
                 startActivityForResult(intent, captureActivityResult);
             }
@@ -214,55 +215,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivityForResult(intent, libraryActivityResult);
     }
 
+    protected void startWebsiteActivity() {
+        Uri uri = Uri.parse("http://www.google.com/#q=fish"); //lance internet
+
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+
+        startActivity(intent);
+    }
+
     //ArrayList<String> classifier = new ArrayList<>();
 
     protected void startAnalyseActivity() {
 
-        final Mat vocabulary;
+        ArrayList<String> classifierArray = ServerTools.loadClassifier();
+        final CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(this, classifierArray) ;
 
-        System.out.println("read vocabulary from file... ");
-        Loader.load(opencv_core.class);
-        String[] listURl = null;
-        try {
-            listURl = this.getAssets().list("yml"); //recup list image
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println("class0 " + classifiers[0].get_support_vector_count());
+        System.out.println("class1 " + classifiers[1].sizeof());
+        System.out.println("class2 " + classifiers[2].sizeof());
 
-        String photo = ToCache(this, "yml/" + listURl[0], listURl[0]).getAbsolutePath();
-        System.out.println("testtest : " + photo);
-        opencv_core.CvFileStorage storage = opencv_core.cvOpenFileStorage(photo, null, opencv_core.CV_STORAGE_READ); // change et met url cache du fichier
-        System.out.println("storage" + storage);
-        Pointer p = opencv_core.cvReadByName(storage, null, "vocabulary", opencv_core.cvAttrList());
-        opencv_core.CvMat cvMat = new opencv_core.CvMat(p);
-        vocabulary = new opencv_core.Mat(cvMat);
-        System.out.println("vocabulary loaded " + vocabulary.rows() + " x " + vocabulary.cols());
-        opencv_core.cvReleaseFileStorage(storage);
-
-
-        //create SIFT feature point extracter
-        final SIFT detector;
-        // default parameters ""opencv2/features2d/features2d.hpp""
-        detector = new SIFT(0, 3, 0.04, 10, 1.6);
-
-        //create a matcher with FlannBased Euclidien distance (possible also with BruteForce-Hamming)
-        final FlannBasedMatcher matcher;
-        matcher = new FlannBasedMatcher();
-
-        //create BoF (or BoW) descriptor extractor
-        final BOWImgDescriptorExtractor bowide;
-        bowide = new BOWImgDescriptorExtractor(detector.asDescriptorExtractor(), matcher);
-
-        //Set the dictionary with the vocabulary we created in the first step
-        bowide.setVocabulary(vocabulary);
-        System.out.println("Vocab is set");
-
-        ArrayList<String> classifier = new ArrayList<>();
-
-
-        classifier.add("Coca.xml");
-        classifier.add("Pepsi.xml");
-        classifier.add("Sprite.xml");
+        SiftTools.doComparison(this,classifierArray,classifiers);
 
         /*getIndexJsonServ(new VolleyCallback() {
             @Override
@@ -283,104 +255,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // charge index.json, parse le, remplir class_name avec le json.
 
-        final CvSVM[] classifiers;
-        classifiers = new CvSVM[classifier.size()];
-        for (int i = 0; i < classifier.size(); i++) {
-            //System.out.println("Ok. Creating class name from " + className);
-            //open the file to write the resultant descriptor
-            classifiers[i] = new CvSVM();
-            System.out.println("class " + classifiers[i].get_support_vector_count());
-            String fileTemp = ToCache(this, "classifier/" + classifier.get(i), classifier.get(i)).getAbsolutePath();
-            System.out.println(fileTemp);
-            classifiers[i].load(fileTemp); // load xml dans classifier en cache url
-
-        }
-        System.out.println("class0 " + classifiers[0].get_support_vector_count());
-        System.out.println("class1 " + classifiers[1].sizeof());
-        System.out.println("class2 " + classifiers[2].sizeof());
-
-
-        Mat response_hist = new Mat();
-        KeyPoint keypoints = new KeyPoint();
-        Mat inputDescriptors = new Mat();
-
-        //System.out.println("path:" + im.getName());
-
-        String photoTest = ToCache(this, "ImageBank/TestImage/Pepsi_13.jpg", "Pepsi_13.jpg").getAbsolutePath();
-
-        //File im = new File( "ImageBank/TestImage/Coca_12.jpg");
-
-        Mat imageTest = imread(photoTest, 1);
-        detector.detectAndCompute(imageTest, Mat.EMPTY, keypoints, inputDescriptors);
-        bowide.compute(imageTest, keypoints, response_hist);
-
-        // Finding best match
-        float minf = Float.MAX_VALUE;
-        String bestMatch = null;
-
-        long timePrediction = System.currentTimeMillis();
-        // loop for all classes
-        for (int i = 0; i < classifier.size(); i++) {
-            // classifier prediction based on reconstructed histogram
-            float res = classifiers[i].predict(response_hist, true);
-            //System.out.println(class_names[i] + " is " + res);
-            if (res < minf) {
-                minf = res;
-                bestMatch = classifier.get(i);
-            }
-        }
-        timePrediction = System.currentTimeMillis() - timePrediction;
-        System.out.println(photoTest + "  predicted as " + bestMatch + " in " + timePrediction + " ms");
-
     }
 
     public void addToClassifier(String string) {
 //this.classifier.add(string);
-    }
-
-    protected void startWebsiteActivity() {
-
-
-        //lance internet
-        Uri uri = Uri.parse("http://www.google.com/#q=fish");
-
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-
-
-        startActivity(intent);
-    }
-
-    protected String getRealPath(Context context, Uri uri) {
-        Cursor cursor;
-
-        String[] projection = {MediaStore.Images.Media.DATA};
-        cursor = context.getContentResolver().query(
-                uri,
-                projection,
-                null,
-                null,
-                null
-        );
-
-        int dataIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-
-        return cursor.getString(dataIndex);
-    }
-
-    protected Bitmap decodeFile(File file) {
-        Bitmap bitmap = null;
-
-        try {
-            FileInputStream inputStream = new FileInputStream(file); // System.err
-
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            bitmap = BitmapFactory.decodeStream(inputStream, null, options);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return bitmap;
     }
 
     // Create an image file name
@@ -414,102 +292,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Uri contentUri = Uri.fromFile(f);
         mediaScanIntent.setData(photoTakenUri);
         this.sendBroadcast(mediaScanIntent);
-    }
-
-    public static File ToCache(Context context, String Path, String fileName) {
-        InputStream input;
-        FileOutputStream output;
-        byte[] buffer;
-        String filePath = context.getCacheDir() + "/" + fileName;
-        File file = new File(filePath);
-        AssetManager assetManager = context.getAssets();
-
-        try {
-            input = assetManager.open(Path);
-            buffer = new byte[input.available()];
-            input.read(buffer);
-            input.close();
-
-            output = new FileOutputStream(filePath);
-            output.write(buffer);
-            output.close();
-            return file;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public void getIndexJsonServ(final VolleyCallback callback) {
-        String url = "http://www-rech.telecom-lille.fr/nonfreesift/index.json";
-
-        RequestQueue queue = Volley.newRequestQueue(this);
-        RequestFuture<JSONObject> future = RequestFuture.newFuture();
-
-        JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        System.out.println("aaaa : " + response.toString());
-                        callback.onSuccess(response);
-
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        System.out.println("Error.Responseaaaa : " + error.toString());
-                    }
-                }
-        );
-
-        queue.add(getRequest);
-    }
-
-    public JSONObject getIndexJsonServ2() {
-        String url = "http://www-rech.telecom-lille.fr/nonfreesift/index.json";
-
-        RequestQueue queue = Volley.newRequestQueue(this);
-        RequestFuture<JSONObject> future = RequestFuture.newFuture();
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, new JSONObject(), future, future);
-        queue.add(request);
-        JSONObject response=null;
-        try {
-            System.out.println("ici");
-            response = future.get(3, TimeUnit.SECONDS);
-            System.out.println("ici");
-            return response;
-
-        } catch (InterruptedException e) {
-            // exception handling
-        } catch (ExecutionException e) {
-            // exception handling
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        }
-        return response;
-    }
-
-    public void getXmlServ(String url){
-        RequestQueue queue = Volley.newRequestQueue(this);
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.d(TAG,"@@REST"+"Response is: "+ response.substring(12000,12500));
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // mTextView.setText("That didn't work!");
-                        Log.d(TAG,"@@REST That didn't work!");
-                    }
-                }
-        );
-
-        queue.add(stringRequest);
     }
 }
