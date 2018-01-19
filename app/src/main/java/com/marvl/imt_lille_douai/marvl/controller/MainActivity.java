@@ -28,6 +28,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.marvl.imt_lille_douai.marvl.BuildConfig;
@@ -40,7 +41,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.bytedeco.javacpp.opencv_features2d.drawMatches;
 import static org.bytedeco.javacpp.opencv_highgui.imread;
@@ -58,6 +63,8 @@ import org.bytedeco.javacpp.opencv_features2d.FlannBasedMatcher;
 import org.bytedeco.javacpp.opencv_features2d.KeyPoint;
 import org.bytedeco.javacpp.opencv_ml.CvSVM;
 import org.bytedeco.javacpp.opencv_nonfree.SIFT;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -207,6 +214,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivityForResult(intent, libraryActivityResult);
     }
 
+    //ArrayList<String> classifier = new ArrayList<>();
+
     protected void startAnalyseActivity() {
 
         final Mat vocabulary;
@@ -248,24 +257,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bowide.setVocabulary(vocabulary);
         System.out.println("Vocab is set");
 
-        int classNumber = 3;
-        String[] class_names;
-        class_names = new String[classNumber];
+        ArrayList<String> classifier = new ArrayList<>();
+
+
+        /*classifier.add("Coca.xml");
+        classifier.add("Pepsi.xml");
+        classifier.add("Sprite.xml");*/
+
+        /*getIndexJsonServ(new VolleyCallback() {
+            @Override
+            public void onSuccess(JSONObject json) {
+                try {
+                    System.out.println("JeSuisUnTest");
+                    for(int i=0;i<json.getJSONArray("brands").length(); i++) {
+                        System.out.println("JeSuisUnTest2");
+                       // classifier.add(json.getJSONArray("brands").getJSONObject(i).getString("classifier"));
+                        System.out.println("aaaaaaa : " + json.getJSONArray("brands").getJSONObject(i).getString("classifier"));
+                        addToClassifier(json.getJSONArray("brands").getJSONObject(i).getString("classifier"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });*/
 
         // charge index.json, parse le, remplir class_name avec le json.
 
-        class_names[0] = "Coca";
-        class_names[1] = "Pepsi";
-        class_names[2] = "Sprite";
-
         final CvSVM[] classifiers;
-        classifiers = new CvSVM[classNumber];
-        for (int i = 0; i < classNumber; i++) {
+        classifiers = new CvSVM[classifier.size()];
+        for (int i = 0; i < classifier.size(); i++) {
             //System.out.println("Ok. Creating class name from " + className);
             //open the file to write the resultant descriptor
             classifiers[i] = new CvSVM();
             System.out.println("class " + classifiers[i].get_support_vector_count());
-            String fileTemp = ToCache(this, "classifier/" + class_names[i] + ".xml", class_names[i] + ".xml").getAbsolutePath();
+            String fileTemp = ToCache(this, "classifier/" + classifier.get(i), classifier.get(i)).getAbsolutePath();
             System.out.println(fileTemp);
             classifiers[i].load(fileTemp); // load xml dans classifier en cache url
 
@@ -295,18 +320,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         long timePrediction = System.currentTimeMillis();
         // loop for all classes
-        for (int i = 0; i < classNumber; i++) {
+        for (int i = 0; i < classifier.size(); i++) {
             // classifier prediction based on reconstructed histogram
             float res = classifiers[i].predict(response_hist, true);
             //System.out.println(class_names[i] + " is " + res);
             if (res < minf) {
                 minf = res;
-                bestMatch = class_names[i];
+                bestMatch = classifier.get(i);
             }
         }
         timePrediction = System.currentTimeMillis() - timePrediction;
         System.out.println(photoTest + "  predicted as " + bestMatch + " in " + timePrediction + " ms");
-        getIndexJsonServ();
+
+    }
+
+    public void addToClassifier(String string) {
+//this.classifier.add(string);
     }
 
     protected void startWebsiteActivity() {
@@ -412,16 +441,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void getIndexJsonServ() {
+    public void getIndexJsonServ(final VolleyCallback callback) {
         String url = "http://www-rech.telecom-lille.fr/nonfreesift/index.json";
 
         RequestQueue queue = Volley.newRequestQueue(this);
+        RequestFuture<JSONObject> future = RequestFuture.newFuture();
 
         JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        System.out.println("Responseaaaaa : " + response.toString());
+                        System.out.println("aaaa : " + response.toString());
+                        callback.onSuccess(response);
+
                     }
                 },
                 new Response.ErrorListener() {
@@ -433,5 +465,51 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         );
 
         queue.add(getRequest);
+    }
+
+    public JSONObject getIndexJsonServ2() {
+        String url = "http://www-rech.telecom-lille.fr/nonfreesift/index.json";
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestFuture<JSONObject> future = RequestFuture.newFuture();
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, new JSONObject(), future, future);
+        queue.add(request);
+        JSONObject response=null;
+        try {
+            System.out.println("ici");
+            response = future.get(3, TimeUnit.SECONDS);
+            System.out.println("ici");
+            return response;
+
+        } catch (InterruptedException e) {
+            // exception handling
+        } catch (ExecutionException e) {
+            // exception handling
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }
+        return response;
+    }
+
+    public void getXmlServ(String url){
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d(TAG,"@@REST"+"Response is: "+ response.substring(12000,12500));
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // mTextView.setText("That didn't work!");
+                        Log.d(TAG,"@@REST That didn't work!");
+                    }
+                }
+        );
+
+        queue.add(stringRequest);
     }
 }
