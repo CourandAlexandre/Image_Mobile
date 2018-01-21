@@ -23,10 +23,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.android.volley.Cache;
+import com.android.volley.Network;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.BasicNetwork;
+import com.android.volley.toolbox.DiskBasedCache;
+import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
@@ -93,6 +98,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String photoTakenPath;
     Uri photoTakenUri;
 
+    ServerTools serverTools = new ServerTools();
+
+    RequestQueue requestWithCache;
+    private Cache cache;
+
     private static final String SHARED_PROVIDER_AUTHORITY = BuildConfig.APPLICATION_ID + ".fileprovider";
 
     @Override
@@ -116,6 +126,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             captureButton.setEnabled(false);
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         }
+
+        // Instantiate the cache
+        cache = new DiskBasedCache(getCacheDir(), 8192 * 8192); // _MB cap
+
+        // Set up the network to use HttpURLConnection as the HTTP client.
+        Network network = new BasicNetwork(new HurlStack());
+
+        // Instantiate the RequestQueue with the cache and network.
+        requestWithCache = new RequestQueue(cache, network);
+        // Start the queue
+        requestWithCache.start();
+
     }
 
     @Override
@@ -226,37 +248,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //ArrayList<String> classifier = new ArrayList<>();
 
-    protected void startAnalyseActivity() {
-
-        ArrayList<String> classifierArray = ServerTools.loadClassifier();
-        final CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(this, classifierArray) ;
-
-        System.out.println("class0 " + classifiers[0].get_support_vector_count());
-        System.out.println("class1 " + classifiers[1].sizeof());
-        System.out.println("class2 " + classifiers[2].sizeof());
-
-        ComparedImage comparedImage = SiftTools.doComparison(this,classifierArray,classifiers);
-
-        System.out.println(comparedImage.getImageName() + "  predicted as " + comparedImage.getBestMatchImage() + " in " + comparedImage.getTimePrediction() + " ms");
+    protected void startAnalyseActivity()  {
+        serverTools.loadClassifier(this, requestWithCache);
 
         // TODO : renvoi Android vers bouton de la marque du bestMatchImage
-
-        /*getIndexJsonServ(new VolleyCallback() {
-            @Override
-            public void onSuccess(JSONObject json) {
-                try {
-                    System.out.println("JeSuisUnTest");
-                    for(int i=0;i<json.getJSONArray("brands").length(); i++) {
-                        System.out.println("JeSuisUnTest2");
-                       // classifier.add(json.getJSONArray("brands").getJSONObject(i).getString("classifier"));
-                        System.out.println("aaaaaaa : " + json.getJSONArray("brands").getJSONObject(i).getString("classifier"));
-                        addToClassifier(json.getJSONArray("brands").getJSONObject(i).getString("classifier"));
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });*/
 
         // charge index.json, parse le, remplir class_name avec le json.
 

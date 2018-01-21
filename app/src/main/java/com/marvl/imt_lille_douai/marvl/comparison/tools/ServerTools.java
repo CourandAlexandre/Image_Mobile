@@ -4,16 +4,21 @@ package com.marvl.imt_lille_douai.marvl.comparison.tools;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.volley.Cache;
+import com.android.volley.Network;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.marvl.imt_lille_douai.marvl.comparison.image.ComparedImage;
 import com.marvl.imt_lille_douai.marvl.controller.MainActivity;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -26,83 +31,53 @@ import static org.bytedeco.javacpp.opencv_highgui.imwrite;
 import static org.bytedeco.javacpp.opencv_highgui.namedWindow;
 import static org.bytedeco.javacpp.opencv_highgui.waitKey;
 
+import org.bytedeco.javacpp.opencv_ml;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ServerTools {
 
     final String TAG = MainActivity.class.getName();
 
-    public static ArrayList<String>  loadClassifier (){
-        ArrayList<String> classifierArray = new ArrayList<>();
+    ArrayList<String> classifierArray = new ArrayList<>();
+
+    public ServerTools(){
+
+    }
+
+    public ArrayList<String>  loadClassifier (Context context, RequestQueue requestWithCache){
+
+
+
+        getIndexJsonServ(context, requestWithCache);
 
         // TODO : remove and change with server request
-        classifierArray.add("Coca.xml");
-        classifierArray.add("Pepsi.xml");
-        classifierArray.add("Sprite.xml");
-
         return classifierArray;
     }
 
-    public static void getIndexJsonServ(Context context, VolleyCallback callback) {
+    public void getIndexJsonServ(Context context, RequestQueue requestWithCache){
+
         String url = "http://www-rech.telecom-lille.fr/nonfreesift/index.json";
 
         RequestQueue queue = Volley.newRequestQueue(context);
-        RequestFuture<JSONObject> future = RequestFuture.newFuture();
 
-        JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+        JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        System.out.println("aaaa : " + response.toString());
-                        callback.onSuccess(response);
+                        System.out.println("aaaaa json : " + response);
+                        try {
+                            for(int i=0;i<response.getJSONArray("brands").length(); i++) {
+                                classifierArray.add(response.getJSONArray("brands").getJSONObject(i).getString("classifier"));
 
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        System.out.println("Error.Responseaaaa : " + error.toString());
-                    }
-                }
-        );
+                                String urlXml = "http://www-rech.telecom-lille.fr/nonfreesift/" + response.getJSONArray("brands").getJSONObject(i).getString("classifier");
 
-        queue.add(getRequest);
-    }
-
-    public JSONObject getIndexJsonServ2(Context context) {
-        String url = "http://www-rech.telecom-lille.fr/nonfreesift/index.json";
-
-        RequestQueue queue = Volley.newRequestQueue(context);
-        RequestFuture<JSONObject> future = RequestFuture.newFuture();
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, new JSONObject(), future, future);
-        queue.add(request);
-        JSONObject response=null;
-
-        try {
-            System.out.println("ici");
-            response = future.get(3, TimeUnit.SECONDS);
-            System.out.println("ici");
-            return response;
-
-        } catch (InterruptedException e) {
-            // exception handling
-        } catch (ExecutionException e) {
-            // exception handling
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        }
-
-        return response;
-    }
-
-    public void getXmlServ(Context context, String url){
-        RequestQueue queue = Volley.newRequestQueue(context);
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.d(TAG,"@@REST"+"Response is: "+ response.substring(12000,12500));
+                                getStringServ(context,response.getJSONArray("brands").getJSONObject(i).getString("classifier"), requestWithCache);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        findBestTruc(classifierArray, context);
                     }
                 },
                 new Response.ErrorListener() {
@@ -114,7 +89,50 @@ public class ServerTools {
                 }
         );
 
-        queue.add(stringRequest);
+        queue.add(jsonRequest);
+    }
+
+    public void getStringServ(Context context, String xml, RequestQueue requestWithCache){
+
+        String url = "http://www-rech.telecom-lille.fr/nonfreesift/classifiers/" + xml;
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        final DiskBasedCache diskCache = (DiskBasedCache) requestWithCache.getCache();
+                        File file = diskCache.getFileForKey(url);
+                        System.out.println("aaaa xml : " + file.length());
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // mTextView.setText("That didn't work!");
+                        Log.d(TAG,"@@REST That didn't work!");
+                    }
+                }
+        );
+
+        requestWithCache.add(stringRequest);
+    }
+
+    private void vocab(String url){
+
+    }
+
+    public void findBestTruc(ArrayList<String> classifierArray, Context context){
+        final opencv_ml.CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(context, classifierArray) ;
+
+        System.out.println("class0 " + classifiers[0].get_support_vector_count());
+        System.out.println("class1 " + classifiers[1].sizeof());
+        System.out.println("class2 " + classifiers[2].sizeof());
+
+        ComparedImage comparedImage = SiftTools.doComparison(context,classifierArray,classifiers);
+
+        System.out.println(comparedImage.getImageName() + "  predicted as " + comparedImage.getBestMatchImage() + " in " + comparedImage.getTimePrediction() + " ms");
+
     }
 
 }
