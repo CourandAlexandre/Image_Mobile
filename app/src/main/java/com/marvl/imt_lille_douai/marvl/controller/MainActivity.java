@@ -42,6 +42,8 @@ import com.marvl.imt_lille_douai.marvl.comparison.image.ComparedImage;
 import com.marvl.imt_lille_douai.marvl.comparison.tools.GlobalTools;
 import com.marvl.imt_lille_douai.marvl.comparison.tools.ServerTools;
 import com.marvl.imt_lille_douai.marvl.comparison.tools.SiftTools;
+import com.marvl.imt_lille_douai.marvl.comparison.tools.SystemTools;
+import com.marvl.imt_lille_douai.marvl.comparison.variables.GlobalVariables;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -84,7 +86,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     final int captureActivityResult = 100;
     final int libraryActivityResult = 200;
     final int analyseActivityResult = 300;
-
     final int photoRequestActivityResult = 400;
     final int resultCodeActivityResult = 500;
 
@@ -103,6 +104,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     RequestQueue requestWithCache;
     private Cache cache;
 
+    ArrayList<File> classifierArray ;
+    CvSVM[] classifiers;
+
     private static final String SHARED_PROVIDER_AUTHORITY = BuildConfig.APPLICATION_ID + ".fileprovider";
 
     @Override
@@ -110,14 +114,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_layout);
 
-        captureButton = (Button) findViewById(R.id.captureButton);
-        captureButton.setOnClickListener(this);
-
-        libraryButton = (Button) findViewById(R.id.libraryButton);
-        libraryButton.setOnClickListener(this);
-
-        analyseButton = (Button) findViewById(R.id.analyseButton);
-        analyseButton.setOnClickListener(this);
+        setupButtons();
 
         photoView = (ImageView) findViewById(R.id.imageAnalysed);
 
@@ -127,16 +124,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         }
 
-        // Instantiate the cache
-        cache = new DiskBasedCache(getCacheDir(), 8192 * 8192); // _MB cap
-
-        // Set up the network to use HttpURLConnection as the HTTP client.
-        Network network = new BasicNetwork(new HurlStack());
-
-        // Instantiate the RequestQueue with the cache and network.
-        requestWithCache = new RequestQueue(cache, network);
-        // Start the queue
-        requestWithCache.start();
+        prepareAnalyseActivity();
 
     }
 
@@ -246,15 +234,54 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivity(intent);
     }
 
-    //ArrayList<String> classifier = new ArrayList<>();
-
+    // TODO : renvoi Android vers bouton de la marque du bestMatchImage
     protected void startAnalyseActivity()  {
-        serverTools.loadClassifier(this, requestWithCache);
+        ComparedImage comparedImage = SiftTools.doComparison(this, classifierArray, classifiers, "ImageBank/TestImage/Pepsi_13.jpg"); // photoTakenPath
 
-        // TODO : renvoi Android vers bouton de la marque du bestMatchImage
+        Log.d(GlobalVariables.debugTag, comparedImage.toString());
+
+        /* V1
+        String bestSimilitudePath= SimilitudeTools.getMostSimilitudeImageComparedToDataBank(photoTakenPath,dataBank);
+
+        Log.i("ahah",bestSimilitudePath);
+
+        setContentView(R.layout.analyse_layout);
+
+        websiteButton = (Button) findViewById(R.id.websiteButton);
+        websiteButton.setOnClickListener(this);
+         */
 
         // charge index.json, parse le, remplir class_name avec le json.
+    }
 
+    protected void prepareAnalyseActivity(){
+        // Instantiate the cache
+        cache = new DiskBasedCache(getCacheDir(), GlobalVariables.maxCacheSizeInBytes);
+
+        // Set up the network to use HttpURLConnection as the HTTP client.
+        Network network = new BasicNetwork(new HurlStack());
+
+        // Instantiate the RequestQueue with the cache and network.
+        requestWithCache = new RequestQueue(cache, network);
+        requestWithCache.start(); // Start the queue
+
+        serverTools.loadClassifierInCache(this, cache);
+
+        classifierArray = SystemTools.convertCacheToClassifierArray(this);
+        System.out.println("AAA : classifierArray " + classifierArray.toString());
+
+        classifiers = SiftTools.initClassifiersAndCacheThem(this, classifierArray);
+    }
+
+    protected void setupButtons(){
+        captureButton = (Button) findViewById(R.id.captureButton);
+        captureButton.setOnClickListener(this);
+
+        libraryButton = (Button) findViewById(R.id.libraryButton);
+        libraryButton.setOnClickListener(this);
+
+        analyseButton = (Button) findViewById(R.id.analyseButton);
+        analyseButton.setOnClickListener(this);
     }
 
     // TODO : C'est à toi, je pense qu'on peut enlever

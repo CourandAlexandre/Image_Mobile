@@ -72,9 +72,22 @@ public class SimilitudeTools {
         }
 
         timePrediction = System.currentTimeMillis() - timePrediction;
-        System.out.println(photoTest + "  predicted as " + bestMatch + " in " + timePrediction + " ms");
 
         return new ComparedImage(photoTest,bestMatch,timePrediction);
+    }
+
+    // TODO : Remove SYSO
+    public void findBestTruc(ArrayList<File> classifierArray, Context context){
+        /*final opencv_ml.CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(context, classifierArray) ;
+
+        System.out.println("class0 " + classifiers[0].get_support_vector_count());
+        System.out.println("class1 " + classifiers[1].sizeof());
+        System.out.println("class2 " + classifiers[2].sizeof());
+
+        // ComparedImage comparedImage = SiftTools.doComparison(context,classifierArray,classifiers);
+
+        // System.out.println(comparedImage.getImageName() + "  predicted as " + comparedImage.getBestMatchImage() + " in " + comparedImage.getTimePrediction() + " ms");
+        */
     }
 
 }
