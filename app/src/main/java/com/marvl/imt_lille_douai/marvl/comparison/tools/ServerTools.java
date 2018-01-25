@@ -39,13 +39,13 @@ public class ServerTools {
 
     final String TAG = MainActivity.class.getName();
 
-    ArrayList<String> classifierArray = new ArrayList<>();
+    ArrayList<File> classifierArray = new ArrayList<>();
 
     public ServerTools(){
 
     }
 
-    public ArrayList<String>  loadClassifier (Context context, RequestQueue requestWithCache){
+    public ArrayList<File>  loadClassifier (Context context, RequestQueue requestWithCache){
 
 
 
@@ -68,16 +68,14 @@ public class ServerTools {
                         System.out.println("aaaaa json : " + response);
                         try {
                             for(int i=0;i<response.getJSONArray("brands").length(); i++) {
-                                classifierArray.add(response.getJSONArray("brands").getJSONObject(i).getString("classifier"));
-
                                 String urlXml = "http://www-rech.telecom-lille.fr/nonfreesift/" + response.getJSONArray("brands").getJSONObject(i).getString("classifier");
 
-                                getStringServ(context,response.getJSONArray("brands").getJSONObject(i).getString("classifier"), requestWithCache);
+                                getStringServ(context,response.getJSONArray("brands").getJSONObject(i).getString("classifier"), requestWithCache, response.getJSONArray("brands").length(), i);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        findBestTruc(classifierArray, context);
+
                     }
                 },
                 new Response.ErrorListener() {
@@ -92,7 +90,7 @@ public class ServerTools {
         queue.add(jsonRequest);
     }
 
-    public void getStringServ(Context context, String xml, RequestQueue requestWithCache){
+    public void getStringServ(Context context, String xml, RequestQueue requestWithCache, int size, int fichier){
 
         String url = "http://www-rech.telecom-lille.fr/nonfreesift/classifiers/" + xml;
 
@@ -102,6 +100,13 @@ public class ServerTools {
                     public void onResponse(String response) {
                         final DiskBasedCache diskCache = (DiskBasedCache) requestWithCache.getCache();
                         File file = diskCache.getFileForKey(url);
+
+                        classifierArray.add(GlobalTools.toCacheServ(context,file));
+
+                        if(size == fichier+1) {
+                            findBestTruc(classifierArray, context);
+                        }
+
                         System.out.println("aaaa xml : " + file.length());
 
                     }
@@ -118,13 +123,8 @@ public class ServerTools {
         requestWithCache.add(stringRequest);
     }
 
-    private void vocab(String url){
-
-    }
-
-    public void findBestTruc(ArrayList<String> classifierArray, Context context){
+    public void findBestTruc(ArrayList<File> classifierArray, Context context){
         final opencv_ml.CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(context, classifierArray) ;
-
         System.out.println("class0 " + classifiers[0].get_support_vector_count());
         System.out.println("class1 " + classifiers[1].sizeof());
         System.out.println("class2 " + classifiers[2].sizeof());

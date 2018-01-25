@@ -118,6 +118,31 @@ public class GlobalTools {
         }
     }
 
+    public static File toCacheServ(Context context, File file) {
+        InputStream input;
+        FileOutputStream output;
+        byte[] buffer;
+
+        String filePath = context.getApplicationContext().getFilesDir().getName() + "/" + file.getName();
+        AssetManager assetManager = context.getAssets();
+
+        try {
+            input = assetManager.open(file.getAbsolutePath());
+            buffer = new byte[input.available()];
+            input.read(buffer);
+            input.close();
+
+            output = new FileOutputStream(filePath);
+            output.write(buffer);
+            output.close();
+            return file;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static String getRealPath(Context context, Uri uri){
         Cursor cursor;
 

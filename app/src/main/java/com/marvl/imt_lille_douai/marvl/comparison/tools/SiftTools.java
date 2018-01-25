@@ -68,7 +68,7 @@ public class SiftTools {
     // Sigma gaussien appliqué à l'image d'entrée à l'octave \ # 0. Réduire le nombre si image capturée est de faible qualité
     public static double sigma = 1.6; // Jalon 1 value : 1.6
 
-    public static ComparedImage doComparison(Context context, ArrayList<String> classifierArray, CvSVM[] classifiers){
+    public static ComparedImage doComparison(Context context, ArrayList<File> classifierArray, CvSVM[] classifiers){
         Loader.load(opencv_core.class);
 
         Mat vocabulary = loadVocabulary(context);
@@ -124,21 +124,21 @@ public class SiftTools {
         return vocabulary;
     }
 
-    public static CvSVM[] initClassifiersAndCacheThem(Context context, ArrayList<String> classifierArray) {
+    public static CvSVM[] initClassifiersAndCacheThem(Context context, ArrayList<File> classifierArray) {
         CvSVM[] classifiers = new CvSVM[classifierArray.size()]; // SupportVectorMachine array initialize to nb of xml size
 
+        System.out.println("Ok. Creating class name from " + classifierArray.size());
+
         for (int i = 0; i < classifierArray.size(); i++) {
-            //System.out.println("Ok. Creating class name from " + className);
+            System.out.println("Ok. Creating class name from " + classifierArray.get(i).getAbsolutePath());
 
             //open the file to write the resultant descriptor
             classifiers[i] = new CvSVM(); // Default and training constructor
             System.out.println("class " + classifiers[i].get_support_vector_count());
 
-            // TODO : Get les classifier directement depuis le server et les load. Ca ne sert à rien de les mettre en cache puisqu'ils doivent juste être chargé dans le classifiers.
-            String fileTemp = GlobalTools.toCache(context, "classifier/" + classifierArray.get(i), classifierArray.get(i)).getAbsolutePath();
-            System.out.println(fileTemp);
+            System.out.println("class " + classifierArray.get(i).getTotalSpace());
 
-            classifiers[i].load(fileTemp); // load xml dans classifier en cache url | Load the model from a file (CvStatModel inherit) | Clear the previous XML or YAML to load the complete model state with the specified name from the XML or YAML file.
+            classifiers[i].load( classifierArray.get(i).getAbsolutePath()); // load xml dans classifier en cache url | Load the model from a file (CvStatModel inherit) | Clear the previous XML or YAML to load the complete model state with the specified name from the XML or YAML file.
         }
 
         return classifiers;

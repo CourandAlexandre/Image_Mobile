@@ -52,7 +52,7 @@ import org.json.JSONObject;
 
 public class SimilitudeTools {
 
-    public static ComparedImage getbestMatch(ArrayList<String> classifierArray, CvSVM[] classifiers, Mat responseHist, String photoTest){
+    public static ComparedImage getbestMatch(ArrayList<File> classifierArray, CvSVM[] classifiers, Mat responseHist, String photoTest){
         float minf = Float.MAX_VALUE;
         String bestMatch = null;
 
@@ -67,7 +67,7 @@ public class SimilitudeTools {
 
             if (res < minf) {
                 minf = res;
-                bestMatch = classifierArray.get(i);
+                bestMatch = classifierArray.get(i).getAbsolutePath();
             }
         }
 
