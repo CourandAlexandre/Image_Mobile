@@ -88,10 +88,11 @@ public class ServerTools {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        final DiskBasedCache diskCache = (DiskBasedCache) cache;
-                        File file = diskCache.getFileForKey(url);
+                        //final DiskBasedCache diskCache = (DiskBasedCache) cache;
+                        //File file = diskCache.getFileForKey(url);
 
-                        classifierArray.add(SystemTools.toCacheServ(context,file));
+                        File file = SystemTools.putFileIntoLocal(context, xml,response);
+                        classifierArray.add(SystemTools.putFileIntoLocal(context, xml,response));
 
                         Log.d(GlobalVariables.debugTag, "getStringServ : " + file.toString());
 
