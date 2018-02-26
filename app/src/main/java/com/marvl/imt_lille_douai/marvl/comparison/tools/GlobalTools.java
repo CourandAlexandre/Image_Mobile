@@ -79,4 +79,16 @@ public class GlobalTools {
 
         return pos;
     }
+
+    public static String getFileNameFromPath(String pathName){
+        int nbOfSeparator = 0;
+
+        for(int i=0 ; i < pathName.length(); i++){
+            if(pathName.charAt(i) == '/' ){
+                nbOfSeparator++;
+            }
+        }
+
+        return pathName.substring(indexOfStr(pathName,"/",nbOfSeparator)+1);
+    }
 }

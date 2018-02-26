@@ -39,7 +39,7 @@ public class SiftTools {
         KeyPoint keyPoints = new KeyPoint();
         Mat inputDescriptors = new Mat();
 
-        String photoTestName = testedImagePath.substring(GlobalTools.indexOfStr(testedImagePath,"/",2)+1);
+        String photoTestName = GlobalTools.getFileNameFromPath(testedImagePath);
 
         System.out.println(GlobalVariables.debugTag + " photoTestName :" + photoTestName );
 
