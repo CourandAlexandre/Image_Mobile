@@ -125,6 +125,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         }
 
+        // Clear cache before start
+        SystemTools.clearCache(this);
+
         prepareAnalyseActivity();
 
     }

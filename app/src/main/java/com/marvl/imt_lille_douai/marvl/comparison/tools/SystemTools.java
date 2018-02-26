@@ -108,4 +108,13 @@ public class SystemTools {
         }
         return outputFile;
     }
+
+    public static void clearCache(Context context){
+        File cacheDir = new File(context.getFilesDir().getAbsolutePath());
+        File[] listOfFiles = cacheDir.listFiles();
+
+        for(int i=0 ; i < listOfFiles.length ; i++) {
+            listOfFiles[i].delete();
+        }
+    }
 }
