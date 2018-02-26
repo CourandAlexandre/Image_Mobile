@@ -98,6 +98,11 @@ public class ServerTools {
 
                         if(size == fichier+1) {
                             //findBestTruc(classifierArray, context);
+                            /*System.out.print("AAAA : " + xml);
+                            classifierArray = SystemTools.convertCacheToClassifierArray(context);
+                            System.out.println("AAA : classifierArray " + classifierArray.toString());
+
+                            opencv_ml.CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(context, classifierArray);*/
                         }
 
                         Log.d(GlobalVariables.debugTag, "xml file.length :"+ file.length());

@@ -72,6 +72,7 @@ import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_features2d.BOWImgDescriptorExtractor;
 import org.bytedeco.javacpp.opencv_features2d.FlannBasedMatcher;
 import org.bytedeco.javacpp.opencv_features2d.KeyPoint;
+import org.bytedeco.javacpp.opencv_ml;
 import org.bytedeco.javacpp.opencv_ml.CvSVM;
 import org.bytedeco.javacpp.opencv_nonfree.SIFT;
 import org.json.JSONArray;
@@ -236,6 +237,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     // TODO : renvoi Android vers bouton de la marque du bestMatchImage
     protected void startAnalyseActivity()  {
+        classifierArray = SystemTools.convertCacheToClassifierArray(this);
+        System.out.println("AAA : classifierArray " + classifierArray.toString());
+
+        opencv_ml.CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(this, classifierArray);
+
         ComparedImage comparedImage = SiftTools.doComparison(this, classifierArray, classifiers, "ImageBank/TestImage/Pepsi_13.jpg"); // photoTakenPath
 
         Log.d(GlobalVariables.debugTag, comparedImage.toString());
@@ -266,11 +272,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         requestWithCache.start(); // Start the queue
 
         serverTools.loadClassifierInCache(this, cache);
-
-        classifierArray = SystemTools.convertCacheToClassifierArray(this);
-        System.out.println("AAA : classifierArray " + classifierArray.toString());
-
-        classifiers = SiftTools.initClassifiersAndCacheThem(this, classifierArray);
     }
 
     protected void setupButtons(){

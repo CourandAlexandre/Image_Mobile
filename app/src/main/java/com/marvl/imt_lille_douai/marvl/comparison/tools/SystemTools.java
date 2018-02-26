@@ -47,7 +47,7 @@ public class SystemTools {
         FileOutputStream output;
         byte[] buffer;
 
-        String filePath = context.getApplicationContext().getFilesDir().getName() + "/" + file.getName();
+        String filePath = context.getApplicationContext().getFilesDir().getAbsolutePath() + "/" + file.getName();
         AssetManager assetManager = context.getAssets();
 
         try {
@@ -70,7 +70,7 @@ public class SystemTools {
     public static ArrayList<File> convertCacheToClassifierArray(Context context){
         ArrayList<File> classifierArray = new ArrayList<>();
 
-        File cacheDir = new File(context.getFilesDir().getPath());
+        File cacheDir = new File(context.getFilesDir().getAbsolutePath());
 
         System.out.println("TAG : " + cacheDir);
 
@@ -89,7 +89,7 @@ public class SystemTools {
         Writer writer;
         File outputFile = null;
         //File root = Environment.getExternalStorageDirectory();
-        File outDir = new File(context.getFilesDir() + File.separator + "EZ_time_tracker");
+        File outDir = new File(context.getFilesDir().getAbsolutePath());
 
         if (!outDir.isDirectory()) {
             outDir.mkdir();
