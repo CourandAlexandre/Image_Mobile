@@ -6,6 +6,8 @@ import android.os.Environment;
 
 import com.marvl.imt_lille_douai.marvl.comparison.variables.GlobalVariables;
 
+import org.bytedeco.javacpp.opencv_core;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -79,12 +81,29 @@ public class SystemTools {
         File[] listOfFiles = cacheDir.listFiles();
 
         for(int i=0 ; i < listOfFiles.length ; i++) {
-            if( !listOfFiles[i].getName().contains("volley") ){
+            if( !listOfFiles[i].getName().contains("volley") && !listOfFiles[i].getName().contains("yml") ){
                 classifierArray.add(listOfFiles[i]);
             }
         }
 
         return classifierArray;
+    }
+
+    public static String getCacheVocabularyPath(Context context) {
+        File cacheDir = new File(context.getFilesDir().getAbsolutePath());
+
+        System.out.println(GlobalVariables.debugTag + " cacheDir : " + cacheDir);
+
+        File[] listOfFiles = cacheDir.listFiles();
+
+        for(int i=0 ; i < listOfFiles.length ; i++) {
+            System.out.println(GlobalVariables.debugTag + "ahah"+ listOfFiles[i].getAbsolutePath());
+            if( listOfFiles[i].getName().contains("yml") ){
+               return listOfFiles[i].getAbsolutePath();
+            }
+        }
+
+        return null;
     }
 
     public static File putFileIntoLocal(Context context, String fileName, String response) {

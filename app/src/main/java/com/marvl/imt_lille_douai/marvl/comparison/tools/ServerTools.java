@@ -55,7 +55,13 @@ public class ServerTools {
                     @Override
                     public void onResponse(JSONObject response) {
                         System.out.println(GlobalVariables.debugTag + "VolleyResponse : " + response);
+                        System.out.println(GlobalVariables.debugTag + "testtest : ");
 
+                            //System.out.println(GlobalVariables.debugTag + " : ici : " + response.getJSONArray("vocabulary").toString());
+                            getYmlServ(context,cache);
+
+
+                        System.out.println(GlobalVariables.debugTag + "testtest2 : ");
                         try {
                             for(int i=0; i<response.getJSONArray("brands").length(); i++) {
                                 String urlXml = GlobalVariables.serverUrl + response.getJSONArray("brands").getJSONObject(i).getString("classifier");
@@ -104,6 +110,37 @@ public class ServerTools {
 
                             opencv_ml.CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(context, classifierArray);*/
                         }
+
+                        System.out.println(GlobalVariables.debugTag + " xml file.length : " + file.length());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        System.out.println(GlobalVariables.debugTag +  "Volley string error : " + error); // OR mTextView.setText("That didn't work!");
+                    }
+                }
+        );
+
+        queue.add(stringRequest);
+    }
+
+    public void getYmlServ(Context context, Cache cache){
+
+        String url = GlobalVariables.serverUrl + "/vocabulary.yml";
+
+        System.out.println(GlobalVariables.debugTag + " url yml : " + url);
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        File file = SystemTools.putFileIntoLocal(context, "/vocabulary.yml",response);
+
+                        System.out.println(GlobalVariables.debugTag + " getStringServ : " + file.toString());
 
                         System.out.println(GlobalVariables.debugTag + " xml file.length : " + file.length());
                     }

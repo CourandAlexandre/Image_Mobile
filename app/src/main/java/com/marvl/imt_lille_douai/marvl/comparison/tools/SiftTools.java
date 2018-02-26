@@ -56,18 +56,18 @@ public class SiftTools {
     // TODO : Revoir la fonction / récup les images depuis le serveur
     public static Mat loadVocabulary(Context context){
         Mat vocabulary;
-        String[] listURL = null;
+        //String[] listURL = null;
 
-        try {
+        /*try { //a suppr quand yml est good
             listURL = context.getAssets().list("yml"); //recup list image
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
 
-        String photo = SystemTools.toCache(context, "yml/" + listURL[0], listURL[0]).getAbsolutePath();
-        System.out.println(GlobalVariables.debugTag + " photo : " + photo);
+        String photoPath = SystemTools.getCacheVocabularyPath(context);
+        System.out.println(GlobalVariables.debugTag + " photo : " + photoPath);
 
-        opencv_core.CvFileStorage storage = opencv_core.cvOpenFileStorage(photo, null, opencv_core.CV_STORAGE_READ); // change et met url cache du fichier
+        opencv_core.CvFileStorage storage = opencv_core.cvOpenFileStorage(photoPath, null, opencv_core.CV_STORAGE_READ); // change et met url cache du fichier
         System.out.println(GlobalVariables.debugTag + " storage" + storage);
 
         Pointer p = opencv_core.cvReadByName(storage, null, "vocabulary", opencv_core.cvAttrList()); // Find an object by name and decodes it | Null = Function seaches a top level node for the parent Map | vocabulary = node name | cvAttrList = Unused parameter ^^
