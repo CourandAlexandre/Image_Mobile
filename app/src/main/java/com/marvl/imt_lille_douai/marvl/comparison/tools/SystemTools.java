@@ -81,7 +81,7 @@ public class SystemTools {
         File[] listOfFiles = cacheDir.listFiles();
 
         for(int i=0 ; i < listOfFiles.length ; i++) {
-            if( !listOfFiles[i].getName().contains("volley") && !listOfFiles[i].getName().contains("yml") ){
+            if( !listOfFiles[i].getName().contains("volley") && !listOfFiles[i].getName().contains("yml") && !listOfFiles[i].getName().contains("jpg") ){
                 classifierArray.add(listOfFiles[i]);
             }
         }
@@ -128,6 +128,23 @@ public class SystemTools {
             System.out.println("biite : " + e);
         }
         return outputFile;
+    }
+
+    public static String getCachePhotoPath(Context context) {
+        File cacheDir = new File(context.getFilesDir().getAbsolutePath());
+
+        System.out.println(GlobalVariables.debugTag + " cacheDir : " + cacheDir);
+
+        File[] listOfFiles = cacheDir.listFiles();
+
+        for(int i=0 ; i < listOfFiles.length ; i++) {
+            System.out.println(GlobalVariables.debugTag + "ahah"+ listOfFiles[i].getAbsolutePath());
+            if( listOfFiles[i].getName().contains("jpg") ){
+                return listOfFiles[i].getAbsolutePath();
+            }
+        }
+
+        return null;
     }
 
     public static void clearCache(Context context){

@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     String photoTakenPath;
     Uri photoTakenUri;
+    String photoPathCache = "";
 
     ServerTools serverTools = new ServerTools();
 
@@ -77,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     ArrayList<File> classifierArray ;
     CvSVM[] classifiers;
+
+    String pictureName ="";
 
     private static final String SHARED_PROVIDER_AUTHORITY = BuildConfig.APPLICATION_ID + ".fileprovider";
 
@@ -131,7 +134,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 switch (requestCode) {
                     case captureActivityResult:
                         photoView.setImageURI(photoTakenUri);
-
+                        System.out.println("aaaaa : " + photoTakenPath.toString());
+                        //photoPathCache = SystemTools.toCache(this,photoTakenPath,GlobalTools.getFileNameFromPath(photoTakenPath)).getAbsolutePath();
                         break;
 
                     case libraryActivityResult:
@@ -210,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     // TODO : renvoi Android vers bouton de la marque du bestMatchImage
     protected void startAnalyseActivity()  {
-        String defaultFileName = "Coca_12.jpg";
+        String defaultFileName = "Pepsi_13.jpg";
         String defaultPath = "ImageBank/TestImage/";
 
         classifierArray = SystemTools.convertCacheToClassifierArray(this);
@@ -218,7 +222,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         opencv_ml.CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(this, classifierArray);
 
-        ComparedImage comparedImage = SiftTools.doComparison(this, classifierArray, classifiers, defaultPath + defaultFileName); // photoTakenPath
+        //System.out.println(GlobalVariables.debugTag + " ahahah : " + photoPathCache);
+        ComparedImage comparedImage = SiftTools.doComparison(this, classifierArray, classifiers, photoTakenPath); // photoTakenPath
 
         System.out.println(GlobalVariables.debugTag +  comparedImage.toString());
 
@@ -270,13 +275,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "IMG_" + timeStamp + "_";
+        pictureName = imageFileName;
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
         File image = File.createTempFile(imageFileName, ".jpg", storageDir);
 
+
+
+
+        /*File imgCache = SystemTools.toCache(this,image.getAbsolutePath(),image.getName());
+
+        photoPathCache = imgCache.getAbsolutePath();*/
+        //photoPathCache = SystemTools.toCacheServ(this,image).getAbsolutePath();
+
         // Save a file : path for use with ACTION_VIEW intents
         photoTakenPath = image.getAbsolutePath();
         photoTakenUri = Uri.fromFile(image);
+
 
         //galleryAddPic(image);
 

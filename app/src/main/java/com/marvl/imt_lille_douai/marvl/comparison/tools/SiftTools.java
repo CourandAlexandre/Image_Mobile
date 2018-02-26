@@ -43,14 +43,15 @@ public class SiftTools {
 
         System.out.println(GlobalVariables.debugTag + " photoTestName :" + photoTestName );
 
-        String photoTest = SystemTools.toCache(context, testedImagePath , photoTestName).getAbsolutePath();
+        //String photoTest = SystemTools.toCache(context, testedImagePath , photoTestName).getAbsolutePath();
+        //String photoTest = SystemTools.getCachePhotoPath(context);
 
-        Mat imageTest = ImageTools.loadImg3ChannelColor(photoTest); // RGB image matrix
+        Mat imageTest = ImageTools.loadImg3ChannelColor(testedImagePath); // RGB image matrix
 
         sift.detectAndCompute(imageTest, Mat.EMPTY, keyPoints, inputDescriptors); // Detect interesting point in image and convert to matrice | Find keypoints and descriptors in a single step
         BOWDescriptor.compute(imageTest, keyPoints, imageDescriptor);  // Compare imageTest detected keyPoints and store in responseHist | Computes an image descriptor using the set visual vocabulary. Image Descriptor = computed output image descriptor
 
-        return SimilitudeTools.getbestMatch(classifierArray, classifiers, imageDescriptor, photoTest);
+        return SimilitudeTools.getbestMatch(classifierArray, classifiers, imageDescriptor, testedImagePath);
     }
 
     // TODO : Revoir la fonction / récup les images depuis le serveur
