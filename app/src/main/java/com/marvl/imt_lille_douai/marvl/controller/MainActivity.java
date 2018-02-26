@@ -27,15 +27,9 @@ import com.android.volley.Cache;
 import com.android.volley.Network;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.RequestFuture;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.marvl.imt_lille_douai.marvl.BuildConfig;
 import com.marvl.imt_lille_douai.marvl.R;
 import com.marvl.imt_lille_douai.marvl.comparison.image.ComparedImage;
@@ -216,28 +210,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     // TODO : renvoi Android vers bouton de la marque du bestMatchImage
     protected void startAnalyseActivity()  {
-        String defaultFileName = "Pepsi_13.jpg";
+        String defaultFileName = "Coca_12.jpg";
         String defaultPath = "ImageBank/TestImage/";
 
         classifierArray = SystemTools.convertCacheToClassifierArray(this);
-        System.out.println("AAA : classifierArray " + classifierArray.toString());
+        System.out.println(GlobalVariables.debugTag + " classifierArray " + classifierArray.toString());
 
         opencv_ml.CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(this, classifierArray);
 
         ComparedImage comparedImage = SiftTools.doComparison(this, classifierArray, classifiers, defaultPath + defaultFileName); // photoTakenPath
 
-        Log.d(GlobalVariables.debugTag, comparedImage.toString());
+        System.out.println(GlobalVariables.debugTag +  comparedImage.toString());
 
         // Remove tested image from cache after analyse
         SystemTools.clearFileFromCache(this, defaultFileName);
 
         /* V1
         String bestSimilitudePath= SimilitudeTools.getMostSimilitudeImageComparedToDataBank(photoTakenPath,dataBank);
-
         Log.i("ahah",bestSimilitudePath);
-
         setContentView(R.layout.analyse_layout);
-
         websiteButton = (Button) findViewById(R.id.websiteButton);
         websiteButton.setOnClickListener(this);
          */

@@ -39,9 +39,11 @@ public class SiftTools {
         KeyPoint keyPoints = new KeyPoint();
         Mat inputDescriptors = new Mat();
 
-        //String photoTest = GlobalTools.toCache(context, "ImageBank/TestImage/Pepsi_13.jpg", "Pepsi_13.jpg").getAbsolutePath();
-        String photoTestName = testedImagePath.substring(GlobalTools.indexOfStr(testedImagePath,"/",1)+1);
-        String photoTest = SystemTools.toCache(context, testedImagePath , "Pepsi_13.jpg").getAbsolutePath();
+        String photoTestName = testedImagePath.substring(GlobalTools.indexOfStr(testedImagePath,"/",2)+1);
+
+        System.out.println(GlobalVariables.debugTag + " photoTestName :" + photoTestName );
+
+        String photoTest = SystemTools.toCache(context, testedImagePath , photoTestName).getAbsolutePath();
 
         Mat imageTest = ImageTools.loadImg3ChannelColor(photoTest); // RGB image matrix
 
