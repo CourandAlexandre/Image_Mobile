@@ -46,38 +46,14 @@ import com.marvl.imt_lille_douai.marvl.comparison.tools.SystemTools;
 import com.marvl.imt_lille_douai.marvl.comparison.variables.GlobalVariables;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-import static org.bytedeco.javacpp.opencv_features2d.drawMatches;
-import static org.bytedeco.javacpp.opencv_highgui.imread;
-import static org.bytedeco.javacpp.opencv_highgui.imshow;
-import static org.bytedeco.javacpp.opencv_highgui.imwrite;
-import static org.bytedeco.javacpp.opencv_highgui.namedWindow;
-import static org.bytedeco.javacpp.opencv_highgui.waitKey;
-
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.javacpp.Pointer;
-import org.bytedeco.javacpp.opencv_core;
-import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_features2d.BOWImgDescriptorExtractor;
-import org.bytedeco.javacpp.opencv_features2d.FlannBasedMatcher;
-import org.bytedeco.javacpp.opencv_features2d.KeyPoint;
 import org.bytedeco.javacpp.opencv_ml;
 import org.bytedeco.javacpp.opencv_ml.CvSVM;
-import org.bytedeco.javacpp.opencv_nonfree.SIFT;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -240,14 +216,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     // TODO : renvoi Android vers bouton de la marque du bestMatchImage
     protected void startAnalyseActivity()  {
+        String defaultFileName = "Pepsi_13.jpg";
+        String defaultPath = "ImageBank/TestImage/";
+
         classifierArray = SystemTools.convertCacheToClassifierArray(this);
         System.out.println("AAA : classifierArray " + classifierArray.toString());
 
         opencv_ml.CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(this, classifierArray);
 
-        ComparedImage comparedImage = SiftTools.doComparison(this, classifierArray, classifiers, "ImageBank/TestImage/Pepsi_13.jpg"); // photoTakenPath
+        ComparedImage comparedImage = SiftTools.doComparison(this, classifierArray, classifiers, defaultPath + defaultFileName); // photoTakenPath
 
         Log.d(GlobalVariables.debugTag, comparedImage.toString());
+
+        // Remove tested image from cache after analyse
+        SystemTools.clearFileFromCache(this, defaultFileName);
 
         /* V1
         String bestSimilitudePath= SimilitudeTools.getMostSimilitudeImageComparedToDataBank(photoTakenPath,dataBank);

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Environment;
 
+import com.marvl.imt_lille_douai.marvl.comparison.variables.GlobalVariables;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -72,7 +74,7 @@ public class SystemTools {
 
         File cacheDir = new File(context.getFilesDir().getAbsolutePath());
 
-        System.out.println("TAG : " + cacheDir);
+        System.out.println(GlobalVariables.debugTag + " cacheDir : " + cacheDir);
 
         File[] listOfFiles = cacheDir.listFiles();
 
@@ -115,6 +117,17 @@ public class SystemTools {
 
         for(int i=0 ; i < listOfFiles.length ; i++) {
             listOfFiles[i].delete();
+        }
+    }
+
+    public static void clearFileFromCache(Context context, String fileName){
+        File cacheDir = new File(context.getFilesDir().getAbsolutePath());
+        File[] listOfFiles = cacheDir.listFiles();
+
+        for(int i=0 ; i < listOfFiles.length ; i++) {
+            if( !listOfFiles[i].getName().contains(fileName) ){
+                listOfFiles[i].delete();
+            }
         }
     }
 }

@@ -36,7 +36,7 @@ public class ServerTools {
     public ArrayList<File>  loadClassifier (Context context, Cache cache){
         getIndexJsonServ(context, cache);
 
-        Log.d(GlobalVariables.debugTag, classifierArray.toString());
+        System.out.println(GlobalVariables.debugTag + "loadClassifier(), classifierArray : " + classifierArray.toString());
 
         return classifierArray;
     }
@@ -54,7 +54,7 @@ public class ServerTools {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d(GlobalVariables.debugTag, "VolleyResponse : " + response);
+                        System.out.println(GlobalVariables.debugTag + "VolleyResponse : " + response);
 
                         try {
                             for(int i=0; i<response.getJSONArray("brands").length(); i++) {
@@ -71,7 +71,7 @@ public class ServerTools {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d(GlobalVariables.debugTag, "Volley JSON error : "+ error); // OR mTextView.setText("That didn't work!");
+                        System.out.println(GlobalVariables.debugTag + "Volley JSON error : " + error); // OR mTextView.setText("That didn't work!");
                     }
                 }
         );
@@ -94,7 +94,7 @@ public class ServerTools {
                         File file = SystemTools.putFileIntoLocal(context, xml,response);
                         classifierArray.add(SystemTools.putFileIntoLocal(context, xml,response));
 
-                        Log.d(GlobalVariables.debugTag, "getStringServ : " + file.toString());
+                        System.out.println(GlobalVariables.debugTag + " getStringServ : " + file.toString());
 
                         if(size == fichier+1) {
                             //findBestTruc(classifierArray, context);
@@ -105,13 +105,13 @@ public class ServerTools {
                             opencv_ml.CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(context, classifierArray);*/
                         }
 
-                        Log.d(GlobalVariables.debugTag, "xml file.length :"+ file.length());
+                        System.out.println(GlobalVariables.debugTag + " xml file.length : " + file.length());
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d(GlobalVariables.debugTag, "Volley string error :" + error); // OR mTextView.setText("That didn't work!");
+                        System.out.println(GlobalVariables.debugTag +  "Volley string error : " + error); // OR mTextView.setText("That didn't work!");
                     }
                 }
         );

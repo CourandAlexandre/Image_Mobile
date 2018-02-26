@@ -10,13 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static org.bytedeco.javacpp.opencv_features2d.drawMatches;
-import static org.bytedeco.javacpp.opencv_highgui.imread;
-import static org.bytedeco.javacpp.opencv_highgui.imshow;
-import static org.bytedeco.javacpp.opencv_highgui.imwrite;
-import static org.bytedeco.javacpp.opencv_highgui.namedWindow;
-import static org.bytedeco.javacpp.opencv_highgui.waitKey;
-
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.opencv_core;
@@ -70,17 +63,17 @@ public class SiftTools {
         }
 
         String photo = SystemTools.toCache(context, "yml/" + listURL[0], listURL[0]).getAbsolutePath();
-        System.out.println("testtest : " + photo);
+        System.out.println(GlobalVariables.debugTag + " photo : " + photo);
 
         opencv_core.CvFileStorage storage = opencv_core.cvOpenFileStorage(photo, null, opencv_core.CV_STORAGE_READ); // change et met url cache du fichier
-        System.out.println("storage" + storage);
+        System.out.println(GlobalVariables.debugTag + " storage" + storage);
 
         Pointer p = opencv_core.cvReadByName(storage, null, "vocabulary", opencv_core.cvAttrList()); // Find an object by name and decodes it | Null = Function seaches a top level node for the parent Map | vocabulary = node name | cvAttrList = Unused parameter ^^
 
         opencv_core.CvMat cvMat = new opencv_core.CvMat(p);
         vocabulary = new opencv_core.Mat(cvMat);
 
-        System.out.println("vocabulary loaded " + vocabulary.rows() + " x " + vocabulary.cols());
+        System.out.println(GlobalVariables.debugTag + " vocabulary loaded " + vocabulary.rows() + " x " + vocabulary.cols());
         opencv_core.cvReleaseFileStorage(storage);  // Flush storage before exit
 
         return vocabulary;
@@ -89,18 +82,18 @@ public class SiftTools {
     public static CvSVM[] initClassifiersAndCacheThem(Context context, ArrayList<File> classifierArray) {
         CvSVM[] classifiers = new CvSVM[classifierArray.size()]; // SupportVectorMachine array initialize to nb of xml size
 
-        System.out.println("Ok. Creating class name from " + classifierArray.size());
+        System.out.println(GlobalVariables.debugTag + " Ok. Creating class name from " + classifierArray.size());
 
         for (int i = 0; i < classifierArray.size(); i++) {
-            System.out.println("Ok. Creating class name from " + classifierArray.get(i).getAbsolutePath());
+            System.out.println(GlobalVariables.debugTag + " Ok. Creating class name from " + classifierArray.get(i).getAbsolutePath());
 
             //open the file to write the resultant descriptor
             classifiers[i] = new CvSVM(); // Default and training constructor
-            System.out.println("class " + classifiers[i].get_support_vector_count());
+            System.out.println(GlobalVariables.debugTag + " class " + classifiers[i].get_support_vector_count());
 
-            System.out.println("class " + classifierArray.get(i).getTotalSpace());
+            System.out.println(GlobalVariables.debugTag + " class " + classifierArray.get(i).getTotalSpace());
 
-            System.out.println("class " + classifierArray.get(i));
+            System.out.println(GlobalVariables.debugTag + " class " + classifierArray.get(i));
 
             classifiers[i].load( classifierArray.get(i).getAbsolutePath()); // load xml dans classifier en cache url | Load the model from a file (CvStatModel inherit) | Clear the previous XML or YAML to load the complete model state with the specified name from the XML or YAML file.
         }
