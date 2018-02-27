@@ -36,18 +36,4 @@ public class SimilitudeTools {
         return new ComparedImage(photoTest,bestMatch,timePrediction);
     }
 
-    // TODO : Remove SYSO
-    public void findBestTruc(ArrayList<File> classifierArray, Context context){
-        /*final opencv_ml.CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(context, classifierArray) ;
-
-        System.out.println(GlobalVariables.debugTag + " class0 " + classifiers[0].get_support_vector_count());
-        System.out.println(GlobalVariables.debugTag + " class1 " + classifiers[1].sizeof());
-        System.out.println(GlobalVariables.debugTag + " class2 " + classifiers[2].sizeof());
-
-        // ComparedImage comparedImage = SiftTools.doComparison(context,classifierArray,classifiers);
-
-        // System.out.println(GlobalVariables.debugTag + comparedImage.getImageName() + "  predicted as " + comparedImage.getBestMatchImage() + " in " + comparedImage.getTimePrediction() + " ms");
-        */
-    }
-
 }

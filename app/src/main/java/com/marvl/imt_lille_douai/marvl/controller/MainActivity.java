@@ -138,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                         img.setImagePath(recupImg.getAbsolutePath());
 
-                        //photoPathCache = SystemTools.toCache(this,photoTakenPath,GlobalTools.getFileNameFromPath(photoTakenPath)).getAbsolutePath();
                         break;
 
                     case AndroidVariables.libraryActivityResult:

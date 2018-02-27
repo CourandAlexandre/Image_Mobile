@@ -130,7 +130,7 @@ public class SystemTools {
             writer.write(response);
             writer.close();
         } catch (IOException e) {
-            System.out.println("biite : " + e);
+            e.printStackTrace();
         }
         return outputFile;
     }
