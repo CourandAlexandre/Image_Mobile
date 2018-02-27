@@ -16,11 +16,8 @@ public class SimilitudeTools {
         float minf = Float.MAX_VALUE;
         String bestMatch = null;
 
-        long timePrediction = System.currentTimeMillis();
-
         // loop for all classes | xml
         for (int i = 0; i < classifierArray.size(); i++) {
-
             float res = classifiers[i].predict(responseHist, true); // classifier prediction based on reconstructed histogram
 
             //System.out.println(class_names[i] + " is " + res);
@@ -31,9 +28,7 @@ public class SimilitudeTools {
             }
         }
 
-        timePrediction = System.currentTimeMillis() - timePrediction;
-
-        return new ComparedImage(photoTest,bestMatch,timePrediction);
+        return new ComparedImage(photoTest,bestMatch);
     }
 
 }

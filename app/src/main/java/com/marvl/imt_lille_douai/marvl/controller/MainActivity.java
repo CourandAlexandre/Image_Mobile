@@ -252,7 +252,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         opencv_ml.CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(this, classifierArray);
 
+        long timePrediction = System.currentTimeMillis();
+
         ComparedImage comparedImage = SiftTools.doComparison(this, classifierArray, classifiers, img.getImagePath()); // Default ImageBank/TestImage/Pepsi_13.jpg
+
+        comparedImage.setTimePrediction(System.currentTimeMillis() - timePrediction);
 
         System.out.println(GlobalVariables.debugTag + comparedImage.toString());
 

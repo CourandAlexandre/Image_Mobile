@@ -12,6 +12,12 @@ public class ComparedImage {
     private String bestMatchImage;
     private Long timePrediction;
 
+    public ComparedImage(String imageName, String bestMatchImage){
+        this.imageName = imageName;
+        this.bestMatchImage = bestMatchImage;
+        this.imageClass = GlobalTools.getFileNameFromPath(bestMatchImage);
+    }
+
     public ComparedImage(String imageName, String bestMatchImage, Long timePrediction){
         this.imageName = imageName;
         this.bestMatchImage = bestMatchImage;
