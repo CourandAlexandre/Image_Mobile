@@ -329,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void beginCrop(Uri source) {
-        Uri destination = Uri.fromFile(new File(getCacheDir(), "cropped"));
+        Uri destination = Uri.fromFile(new File(getCacheDir(), img.getImageName()));
         Crop.of(source, destination).asSquare().start(this);
     }
 

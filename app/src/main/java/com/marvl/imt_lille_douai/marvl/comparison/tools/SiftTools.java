@@ -90,6 +90,8 @@ public class SiftTools {
 
             System.out.println(GlobalVariables.debugTag + " class " + classifierArray.get(i));
 
+            System.out.println(GlobalVariables.debugTag + " AAAA " + context.getCacheDir().getAbsolutePath());
+
             classifiers[i].load( classifierArray.get(i).getAbsolutePath()); // load xml dans classifier en cache url | Load the model from a file (CvStatModel inherit) | Clear the previous XML or YAML to load the complete model state with the specified name from the XML or YAML file.
         }
 

@@ -31,7 +31,7 @@ public class SystemTools {
         FileOutputStream output;
         byte[] buffer;
 
-        String filePath = context.getFilesDir() + "/" + fileName;
+        String filePath = context.getCacheDir() + "/" + fileName;
         File file = new File(filePath);
         AssetManager assetManager = context.getAssets();
 
@@ -57,7 +57,7 @@ public class SystemTools {
         FileOutputStream output;
         byte[] buffer;
 
-        String filePath = context.getApplicationContext().getFilesDir().getAbsolutePath() + "/" + file.getName();
+        String filePath = context.getApplicationContext().getCacheDir().getAbsolutePath() + "/" + file.getName();
         AssetManager assetManager = context.getAssets();
 
         try {
@@ -80,7 +80,7 @@ public class SystemTools {
     public static ArrayList<File> convertCacheToClassifierArray(Context context){
         ArrayList<File> classifierArray = new ArrayList<>();
 
-        File cacheDir = new File(context.getFilesDir().getAbsolutePath());
+        File cacheDir = new File(context.getCacheDir().getAbsolutePath());
 
         System.out.println(GlobalVariables.debugTag + " cacheDir : " + cacheDir);
 
@@ -96,7 +96,7 @@ public class SystemTools {
     }
 
     public static String getCacheVocabularyPath(Context context) {
-        File cacheDir = new File(context.getFilesDir().getAbsolutePath());
+        File cacheDir = new File(context.getCacheDir().getAbsolutePath());
 
         System.out.println(GlobalVariables.debugTag + " cacheDir : " + cacheDir);
 
@@ -115,7 +115,7 @@ public class SystemTools {
     public static File putFileIntoLocal(Context context, String fileName, String response) {
         Writer writer;
         File outputFile = null;
-        File outDir = new File(context.getFilesDir().getAbsolutePath());
+        File outDir = new File(context.getCacheDir().getAbsolutePath());
 
         if (!outDir.isDirectory()) {
             outDir.mkdir();
@@ -136,7 +136,7 @@ public class SystemTools {
     }
 
     public static String getCachePhotoPath(Context context) {
-        File cacheDir = new File(context.getFilesDir().getAbsolutePath());
+        File cacheDir = new File(context.getCacheDir().getAbsolutePath());
 
         System.out.println(GlobalVariables.debugTag + " cacheDir : " + cacheDir);
 
@@ -153,7 +153,7 @@ public class SystemTools {
     }
 
     public static void clearCache(Context context){
-        File cacheDir = new File(context.getFilesDir().getAbsolutePath());
+        File cacheDir = new File(context.getCacheDir().getAbsolutePath());
         File[] listOfFiles = cacheDir.listFiles();
 
         for(int i=0 ; i < listOfFiles.length ; i++) {
@@ -162,7 +162,7 @@ public class SystemTools {
     }
 
     public static void clearFileFromCache(Context context, String fileName){
-        File cacheDir = new File(context.getFilesDir().getAbsolutePath());
+        File cacheDir = new File(context.getCacheDir().getAbsolutePath());
         File[] listOfFiles = cacheDir.listFiles();
 
         for(int i=0 ; i < listOfFiles.length ; i++) {
@@ -173,7 +173,7 @@ public class SystemTools {
     }
 
     public static File convertBitmapToFile(Context context, Bitmap bitmap, String name){
-        String filePath = context.getFilesDir().getAbsolutePath() ;
+        String filePath = context.getCacheDir().getAbsolutePath() ;
         File file = new File (filePath, name);
 
         OutputStream output;
