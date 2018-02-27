@@ -2,7 +2,12 @@ package com.marvl.imt_lille_douai.marvl.comparison.tools;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Log;
 
 import com.marvl.imt_lille_douai.marvl.comparison.variables.GlobalVariables;
 
@@ -14,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
 
@@ -109,7 +115,6 @@ public class SystemTools {
     public static File putFileIntoLocal(Context context, String fileName, String response) {
         Writer writer;
         File outputFile = null;
-        //File root = Environment.getExternalStorageDirectory();
         File outDir = new File(context.getFilesDir().getAbsolutePath());
 
         if (!outDir.isDirectory()) {
@@ -161,9 +166,29 @@ public class SystemTools {
         File[] listOfFiles = cacheDir.listFiles();
 
         for(int i=0 ; i < listOfFiles.length ; i++) {
-            if( !listOfFiles[i].getName().contains(fileName) ){
+            if( listOfFiles[i].getName().contains(fileName) ){
                 listOfFiles[i].delete();
             }
+        }
+    }
+
+    public static File convertBitmapToFile(Context context, Bitmap bitmap, String name){
+        String filePath = context.getFilesDir().getAbsolutePath() ;
+        File file = new File (filePath, name);
+
+        OutputStream output;
+
+        try {
+            output = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, GlobalVariables.bitmapCompression, output);
+
+            output.flush();
+            output.close();
+
+            return file;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

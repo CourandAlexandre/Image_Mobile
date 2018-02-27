@@ -49,27 +49,19 @@ public class SiftTools {
         Mat imageTest = ImageTools.loadImg3ChannelColor(testedImagePath); // RGB image matrix
 
         sift.detectAndCompute(imageTest, Mat.EMPTY, keyPoints, inputDescriptors); // Detect interesting point in image and convert to matrice | Find keypoints and descriptors in a single step
-        BOWDescriptor.compute(imageTest, keyPoints, imageDescriptor);  // Compare imageTest detected keyPoints and store in responseHist | Computes an image descriptor using the set visual vocabulary. Image Descriptor = computed output image descriptor
+        BOWDescriptor.compute(imageTest, keyPoints, imageDescriptor);  // Compare imageTest detected keyPoints and store in responseHist | Computes an image descriptor using the set visual vocabulary. Img Descriptor = computed output image descriptor
 
         return SimilitudeTools.getbestMatch(classifierArray, classifiers, imageDescriptor, testedImagePath);
     }
 
-    // TODO : Revoir la fonction / récup les images depuis le serveur
     public static Mat loadVocabulary(Context context){
         Mat vocabulary;
-        //String[] listURL = null;
-
-        /*try { //a suppr quand yml est good
-            listURL = context.getAssets().list("yml"); //recup list image
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
 
         String photoPath = SystemTools.getCacheVocabularyPath(context);
-        System.out.println(GlobalVariables.debugTag + " photo : " + photoPath);
+        System.out.println(GlobalVariables.debugTag + " loadVocabulary()  : " + photoPath);
 
         opencv_core.CvFileStorage storage = opencv_core.cvOpenFileStorage(photoPath, null, opencv_core.CV_STORAGE_READ); // change et met url cache du fichier
-        System.out.println(GlobalVariables.debugTag + " storage" + storage);
+        System.out.println(GlobalVariables.debugTag + " loadvocabulary() CvFileStorage : " + storage);
 
         Pointer p = opencv_core.cvReadByName(storage, null, "vocabulary", opencv_core.cvAttrList()); // Find an object by name and decodes it | Null = Function seaches a top level node for the parent Map | vocabulary = node name | cvAttrList = Unused parameter ^^
 

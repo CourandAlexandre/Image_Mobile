@@ -54,14 +54,11 @@ public class ServerTools {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        System.out.println(GlobalVariables.debugTag + "VolleyResponse : " + response);
-                        System.out.println(GlobalVariables.debugTag + "testtest : ");
+                        System.out.println(GlobalVariables.debugTag + " VolleyResponse : " + response);
 
-                            //System.out.println(GlobalVariables.debugTag + " : ici : " + response.getJSONArray("vocabulary").toString());
-                            getYmlServ(context,cache);
+                        //System.out.println(GlobalVariables.debugTag + " : ici : " + response.getJSONArray("vocabulary").toString());
+                        getYmlServ(context,cache);
 
-
-                        System.out.println(GlobalVariables.debugTag + "testtest2 : ");
                         try {
                             for(int i=0; i<response.getJSONArray("brands").length(); i++) {
                                 String urlXml = GlobalVariables.serverUrl + response.getJSONArray("brands").getJSONObject(i).getString("classifier");

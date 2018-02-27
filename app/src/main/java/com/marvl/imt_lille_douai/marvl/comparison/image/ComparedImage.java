@@ -1,8 +1,11 @@
 package com.marvl.imt_lille_douai.marvl.comparison.image;
 
+import com.marvl.imt_lille_douai.marvl.comparison.tools.GlobalTools;
+
 public class ComparedImage {
 
     private String imageName;
+    private String imagePath;
     private Float imageDistance;
     private String imageClass;
 
@@ -13,6 +16,7 @@ public class ComparedImage {
         this.imageName = imageName;
         this.bestMatchImage = bestMatchImage;
         this.timePrediction = timePrediction;
+        this.imageClass = GlobalTools.getFileNameFromPath(bestMatchImage);
     }
 
     public String getImageName() {
@@ -44,7 +48,7 @@ public class ComparedImage {
     public void setTimePrediction(Long timePrediction) { this.timePrediction = timePrediction; }
 
     public String toString(){
-        return "[ComparedImage] ImageName : "+ imageName + " bestMatchImage : " + bestMatchImage + " timePrediction : " + timePrediction + "(ms)";
+        return " [ComparedImage] ImageName : "+ imageName + " bestMatchImage : " + bestMatchImage + " timePrediction : " + timePrediction + "(ms)";
     }
 }
 

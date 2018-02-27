@@ -2,13 +2,12 @@ package com.marvl.imt_lille_douai.marvl.controller;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Path;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -25,7 +24,6 @@ import android.widget.ImageView;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
@@ -33,10 +31,12 @@ import com.android.volley.toolbox.HurlStack;
 import com.marvl.imt_lille_douai.marvl.BuildConfig;
 import com.marvl.imt_lille_douai.marvl.R;
 import com.marvl.imt_lille_douai.marvl.comparison.image.ComparedImage;
+import com.marvl.imt_lille_douai.marvl.comparison.image.Img;
 import com.marvl.imt_lille_douai.marvl.comparison.tools.GlobalTools;
 import com.marvl.imt_lille_douai.marvl.comparison.tools.ServerTools;
 import com.marvl.imt_lille_douai.marvl.comparison.tools.SiftTools;
 import com.marvl.imt_lille_douai.marvl.comparison.tools.SystemTools;
+import com.marvl.imt_lille_douai.marvl.comparison.variables.AndroidVariables;
 import com.marvl.imt_lille_douai.marvl.comparison.variables.GlobalVariables;
 
 import java.io.File;
@@ -53,13 +53,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     final String TAG = MainActivity.class.getName();
 
-    protected static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 0;
-    final int captureActivityResult = 100;
-    final int libraryActivityResult = 200;
-    final int analyseActivityResult = 300;
-    final int photoRequestActivityResult = 400;
-    final int resultCodeActivityResult = 500;
-
     Button captureButton;
     Button libraryButton;
     Button analyseButton;
@@ -67,9 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     ImageView photoView;
 
-    String photoTakenPath;
-    Uri photoTakenUri;
-    String photoPathCache = "";
+    Img img = new Img("ImageBank/TestImage/Pepsi_13.jpg");
 
     ServerTools serverTools = new ServerTools();
 
@@ -78,10 +69,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     ArrayList<File> classifierArray ;
     CvSVM[] classifiers;
-
-    String pictureName ="";
-
-    private static final String SHARED_PROVIDER_AUTHORITY = BuildConfig.APPLICATION_ID + ".fileprovider";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             Log.i(TAG, "Permission wasn't allowed");
+            System.out.println(GlobalVariables.debugTag + " onCreate Permission wasn't allowed" );
+
             captureButton.setEnabled(false);
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         }
@@ -132,41 +121,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (resultCode) {
             case Activity.RESULT_OK:
                 switch (requestCode) {
-                    case captureActivityResult:
-                        photoView.setImageURI(photoTakenUri);
-                        System.out.println("aaaaa : " + photoTakenPath.toString());
+                    case AndroidVariables.captureActivityResult:
+                        System.out.println(GlobalVariables.debugTag + " inCaptureActivityResult ");
+                        photoView.setImageURI(img.getImageUri());
+
+                        Bitmap bitmap = ((BitmapDrawable)photoView.getDrawable()).getBitmap();
+                        File recupImg = SystemTools.convertBitmapToFile(this,bitmap,img.getImageName());
+
+                        img.setImagePath(recupImg.getAbsolutePath());
+
                         //photoPathCache = SystemTools.toCache(this,photoTakenPath,GlobalTools.getFileNameFromPath(photoTakenPath)).getAbsolutePath();
                         break;
 
-                    case libraryActivityResult:
+                    case AndroidVariables.libraryActivityResult:
                         //processPhotoLibrary(intent);
 
-                        //Log.i(TAG,intent.toString());
+                        img.setImageUri(intent.getData());
+                        photoView.setImageURI(img.getImageUri());
 
-                        Uri photoUri = intent.getData();
-                        photoView.setImageURI(photoUri);
-
-                        Log.i(TAG, photoUri.toString());
+                        System.out.println(GlobalVariables.debugTag + " LibraryActivityResult img : " + img.toString());
                         break;
 
-                    case analyseActivityResult:
+                    case AndroidVariables.analyseActivityResult:
 
                         break;
                 }
                 break;
+            case Activity.RESULT_CANCELED :
+                System.out.println(GlobalVariables.debugTag + " onActivityResult : ResultCanceled" );
+                break ;
         }
-    }
-
-    protected void processPhotoLibrary(Intent intent) {
-        Uri photoUri = intent.getData();
-        String pathToPhoto = GlobalTools.getRealPath(getApplicationContext(), photoUri);
-
-        File pathToFile = new File(pathToPhoto);
-        Bitmap photoBitmap = GlobalTools.decodeFile(pathToFile); // err -> Maybe on path
-
-        photoView.setImageBitmap(photoBitmap);
-
-        Log.i(TAG, pathToPhoto);
     }
 
     protected void startCaptureActivity() {
@@ -175,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Ensure that there's a camera activity to handle the intent
         if (intent.resolveActivity(getPackageManager()) != null) {
             File photoFile = null; // Create the File where the photo should go
+
             try {
                 photoFile = createImageFile();
             } catch (IOException e) {
@@ -184,13 +169,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // Continue only if the File was successfully created
             if (photoFile != null) {
                 //Uri photoUri = FileProvider.getUriForFile(this,SHARED_PROVIDER_AUTHORITY,photoFile);
-                Uri photoUri = FileProvider.getUriForFile(this.getApplicationContext(), "com.marvl.imt_lille_douai.marvl.fileprovider", photoFile);
+                img.setImageUri(FileProvider.getUriForFile(this.getApplicationContext(), "com.marvl.imt_lille_douai.marvl.fileprovider", photoFile));
 
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, img.getImageUri());
 
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-
-                startActivityForResult(intent, captureActivityResult);
+                startActivityForResult(intent, AndroidVariables.captureActivityResult);
             }
         }
     }
@@ -198,10 +182,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void startLibraryActivity() {
         Intent intent = new Intent();
 
-        intent.setType("image/*");
+        intent.setType("img/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
 
-        startActivityForResult(intent, libraryActivityResult);
+        startActivityForResult(intent, AndroidVariables.libraryActivityResult);
     }
 
     protected void startWebsiteActivity() {
@@ -210,25 +194,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
 
         startActivity(intent);
-    }
-
-    // TODO : renvoi Android vers bouton de la marque du bestMatchImage
-    protected void startAnalyseActivity()  {
-        String defaultFileName = "Pepsi_13.jpg";
-        String defaultPath = "ImageBank/TestImage/";
-
-        classifierArray = SystemTools.convertCacheToClassifierArray(this);
-        System.out.println(GlobalVariables.debugTag + " classifierArray " + classifierArray.toString());
-
-        opencv_ml.CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(this, classifierArray);
-
-        //System.out.println(GlobalVariables.debugTag + " ahahah : " + photoPathCache);
-        ComparedImage comparedImage = SiftTools.doComparison(this, classifierArray, classifiers, photoTakenPath); // photoTakenPath
-
-        System.out.println(GlobalVariables.debugTag +  comparedImage.toString());
-
-        // Remove tested image from cache after analyse
-        SystemTools.clearFileFromCache(this, defaultFileName);
 
         /* V1
         String bestSimilitudePath= SimilitudeTools.getMostSimilitudeImageComparedToDataBank(photoTakenPath,dataBank);
@@ -237,8 +202,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         websiteButton = (Button) findViewById(R.id.websiteButton);
         websiteButton.setOnClickListener(this);
          */
-
-        // charge index.json, parse le, remplir class_name avec le json.
     }
 
     protected void prepareAnalyseActivity(){
@@ -255,6 +218,91 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         serverTools.loadClassifierInCache(this, cache);
     }
 
+    // TODO : renvoi Android vers bouton de la marque du bestMatchImage
+    protected void startAnalyseActivity()  {
+        // Put the taken photo into cache to be faster if img has been set
+        /*if( !img.getImageUri().equals(null) ){
+            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            String imagePathExternal = storageDir + "/" + img.getImageName();
+
+            System.out.println(GlobalVariables.debugTag + " imagePathFrom external dir : " + imagePathExternal);
+
+            File copyTakenPhotoToCache = SystemTools.toCache(this,imagePathExternal,img.getImageName());
+
+            img.setImagePath(copyTakenPhotoToCache.getAbsolutePath());
+
+            System.out.println(GlobalVariables.debugTag + " Img path : " + img.getImagePath() );
+        }*/
+
+        classifierArray = SystemTools.convertCacheToClassifierArray(this);
+        System.out.println(GlobalVariables.debugTag + " classifierArray : " + classifierArray.toString());
+
+        opencv_ml.CvSVM[] classifiers = SiftTools.initClassifiersAndCacheThem(this, classifierArray);
+
+        ComparedImage comparedImage = SiftTools.doComparison(this, classifierArray, classifiers, img.getImagePath()); // Default ImageBank/TestImage/Pepsi_13.jpg
+
+        System.out.println(GlobalVariables.debugTag + comparedImage.toString());
+
+        // Remove tested img from cache after analyse
+        SystemTools.clearFileFromCache(this, img.getImageName());
+    }
+
+    // Create an img file name
+    private File createImageFile() throws IOException {
+        System.out.println(GlobalVariables.debugTag + " inCreateImageFile");
+
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "IMG_" + timeStamp;
+
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        String imagePath = storageDir + "/" + imageFileName + ".jpg";
+
+        File image = new File(imagePath);
+        image.getParentFile().mkdirs();
+        image.createNewFile();
+        image.canRead();
+
+        System.out.println(GlobalVariables.debugTag + " newFile : " + image.toString());
+
+        //File image = File.createTempFile(imageFileName, ".jpg", storageDir);
+
+        // Save a file : path for use with ACTION_VIEW intents
+        img.setImageUri(Uri.fromFile(image));
+
+        //galleryAddPic(img);
+
+        //folder stuff
+        /*File imagesFolder = new File(Environment.getExternalStorageDirectory(), "MyImages");
+        imagesFolder.mkdirs();
+
+        File img = new File(Environment.getExternalStorageDirectory(),"fname_" +
+                String.valueOf(System.currentTimeMillis()) + ".jpg");
+        Uri uriSavedImage = Uri.fromFile(img);*/
+
+        return image;
+    }
+
+    // TODO
+    private void galleryAddPic(File f) {
+        Log.i(TAG, "TRUUUUC : " + f.getAbsolutePath());
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(img.getImageUri());
+        this.sendBroadcast(mediaScanIntent);
+    }
+
+    protected void processPhotoLibrary(Intent intent) {
+        Uri photoUri = intent.getData();
+        String pathToPhoto = GlobalTools.getRealPath(getApplicationContext(), photoUri);
+
+        File pathToFile = new File(pathToPhoto);
+        Bitmap photoBitmap = GlobalTools.decodeFile(pathToFile); // err -> Maybe on path
+
+        photoView.setImageBitmap(photoBitmap);
+
+        Log.i(TAG, pathToPhoto);
+    }
+
     protected void setupButtons(){
         captureButton = (Button) findViewById(R.id.captureButton);
         captureButton.setOnClickListener(this);
@@ -266,51 +314,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         analyseButton.setOnClickListener(this);
     }
 
-    // TODO : C'est à toi, je pense qu'on peut enlever
-    public void addToClassifier(String string) {
-        //this.classifier.add(string);
-    }
-
-    // Create an image file name
-    private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "IMG_" + timeStamp + "_";
-        pictureName = imageFileName;
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-        File image = File.createTempFile(imageFileName, ".jpg", storageDir);
-
-
-
-
-        /*File imgCache = SystemTools.toCache(this,image.getAbsolutePath(),image.getName());
-
-        photoPathCache = imgCache.getAbsolutePath();*/
-        //photoPathCache = SystemTools.toCacheServ(this,image).getAbsolutePath();
-
-        // Save a file : path for use with ACTION_VIEW intents
-        photoTakenPath = image.getAbsolutePath();
-        photoTakenUri = Uri.fromFile(image);
-
-
-        //galleryAddPic(image);
-
-        //folder stuff
-        /*File imagesFolder = new File(Environment.getExternalStorageDirectory(), "MyImages");
-        imagesFolder.mkdirs();
-
-        File image = new File(Environment.getExternalStorageDirectory(),"fname_" +
-                String.valueOf(System.currentTimeMillis()) + ".jpg");
-        Uri uriSavedImage = Uri.fromFile(image);*/
-
-        return image;
-    }
-
-    private void galleryAddPic(File f) {
-        Log.i(TAG, "TRUUUUC : " + f.getAbsolutePath());
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(photoTakenUri);
-        this.sendBroadcast(mediaScanIntent);
-    }
 }

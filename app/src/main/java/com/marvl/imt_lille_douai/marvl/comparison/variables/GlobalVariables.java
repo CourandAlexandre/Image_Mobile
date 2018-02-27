@@ -7,5 +7,7 @@ public class GlobalVariables {
 
     public static final Integer maxCacheSizeInBytes = 8192 * 8192 ; // _MB cap
 
-    public static final String debugTag = "spoon" ;
+    public static final String debugTag = "[spoon]" ;
+
+    public static final Integer bitmapCompression = 50;
 }
