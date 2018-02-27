@@ -38,6 +38,7 @@ import com.marvl.imt_lille_douai.marvl.comparison.tools.SiftTools;
 import com.marvl.imt_lille_douai.marvl.comparison.tools.SystemTools;
 import com.marvl.imt_lille_douai.marvl.comparison.variables.AndroidVariables;
 import com.marvl.imt_lille_douai.marvl.comparison.variables.GlobalVariables;
+import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
 import java.io.IOException;
@@ -122,6 +123,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case Activity.RESULT_OK:
                 switch (requestCode) {
                     case AndroidVariables.captureActivityResult:
+
+                        /** resize **/
+
+                        beginCrop(img.getImageUri());
+
+                        /** resize **/
+
                         System.out.println(GlobalVariables.debugTag + " inCaptureActivityResult ");
                         photoView.setImageURI(img.getImageUri());
 
@@ -144,6 +152,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     case AndroidVariables.analyseActivityResult:
 
+                        break;
+                    case Crop.REQUEST_PICK:
+                        beginCrop(intent.getData());
+                        break;
+                    case Crop.REQUEST_CROP:
+                        handleCrop(resultCode, intent);
                         break;
                 }
                 break;
@@ -314,4 +328,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         analyseButton.setOnClickListener(this);
     }
 
+    private void beginCrop(Uri source) {
+        Uri destination = Uri.fromFile(new File(getCacheDir(), "cropped"));
+        Crop.of(source, destination).asSquare().start(this);
+    }
+
+    private void handleCrop(int resultCode, Intent result) {
+        if (resultCode == RESULT_OK) {
+            photoView.setImageURI(Crop.getOutput(result));
+        } else if (resultCode == Crop.RESULT_ERROR) {
+            //Toast.makeText(this, Crop.getError(result).getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
 }
