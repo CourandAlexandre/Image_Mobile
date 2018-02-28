@@ -25,7 +25,6 @@ import java.util.ArrayList;
 
 public class SystemTools {
 
-    // TODO : change to OpenFileOutput -> getFileCacheDir
     public static File toCache(Context context, String Path, String fileName) {
         InputStream input;
         FileOutputStream output;
@@ -103,7 +102,7 @@ public class SystemTools {
         File[] listOfFiles = cacheDir.listFiles();
 
         for(int i=0 ; i < listOfFiles.length ; i++) {
-            System.out.println(GlobalVariables.debugTag + "ahah"+ listOfFiles[i].getAbsolutePath());
+            System.out.println(GlobalVariables.debugTag + "getCacheVocabularyPath() | absolutePath : "+ listOfFiles[i].getAbsolutePath());
             if( listOfFiles[i].getName().contains("yml") ){
                return listOfFiles[i].getAbsolutePath();
             }
@@ -122,8 +121,7 @@ public class SystemTools {
         }
         try {
             if (!outDir.isDirectory()) {
-                throw new IOException(
-                        "Unable to create directory EZ_time_tracker. Maybe the SD card is mounted?");
+                throw new IOException("Unable to create directory EZ_time_tracker. Maybe the SD card is mounted?");
             }
             outputFile = new File(outDir, fileName);
             writer = new BufferedWriter(new FileWriter(outputFile));
@@ -135,15 +133,41 @@ public class SystemTools {
         return outputFile;
     }
 
+    public static void putFileIntoDeviceGallery(Context context, File file){
+        InputStream input;
+        FileOutputStream output;
+        byte[] buffer;
+
+        String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + file.getName() ;
+
+        System.out.println(GlobalVariables.debugTag + " putFileIntoDeviceGAllery() | filePath : " + filePath);
+
+        AssetManager assetManager = context.getAssets();
+
+        try {
+            input = assetManager.open(file.getAbsolutePath());
+            buffer = new byte[input.available()];
+            input.read(buffer);
+            input.close();
+
+            output = new FileOutputStream(filePath);
+            output.write(buffer);
+            output.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static String getCachePhotoPath(Context context) {
         File cacheDir = new File(context.getCacheDir().getAbsolutePath());
 
-        System.out.println(GlobalVariables.debugTag + " cacheDir : " + cacheDir);
+        System.out.println(GlobalVariables.debugTag + "  getCachePhotoPath() | cacheDir : " + cacheDir);
 
         File[] listOfFiles = cacheDir.listFiles();
 
         for(int i=0 ; i < listOfFiles.length ; i++) {
-            System.out.println(GlobalVariables.debugTag + "ahah"+ listOfFiles[i].getAbsolutePath());
+            System.out.println(GlobalVariables.debugTag + " getCachePhotoPath() | absolutePath : "+ listOfFiles[i].getAbsolutePath());
             if( listOfFiles[i].getName().contains("jpg") ){
                 return listOfFiles[i].getAbsolutePath();
             }
@@ -166,10 +190,20 @@ public class SystemTools {
         File[] listOfFiles = cacheDir.listFiles();
 
         for(int i=0 ; i < listOfFiles.length ; i++) {
+            System.out.println(GlobalVariables.debugTag + " clearFileFromCache() : " + listOfFiles[i].getName() );
+
             if( listOfFiles[i].getName().contains(fileName) ){
-                listOfFiles[i].delete();
+                System.out.println(GlobalVariables.debugTag + " delete clearFileFromCache() : " + listOfFiles[i].getAbsolutePath() + " Path : " + listOfFiles[i].getPath());
+                //listOfFiles[i].delete();
+                File imgToDelete = new File(listOfFiles[i].getAbsolutePath());
+                imgToDelete.delete();
             }
         }
+
+        for(int i=0 ; i < listOfFiles.length ; i++) {
+            System.out.println(GlobalVariables.debugTag + " after clearFileFromCache() : " + listOfFiles[i].getName());
+        }
+
     }
 
     public static File convertBitmapToFileAndPutFileInCache(Context context, Bitmap bitmap, String name){
@@ -191,4 +225,5 @@ public class SystemTools {
             return null;
         }
     }
+
 }

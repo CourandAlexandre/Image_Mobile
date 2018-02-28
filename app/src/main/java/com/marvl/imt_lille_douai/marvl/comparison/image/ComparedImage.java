@@ -56,7 +56,7 @@ public class ComparedImage {
     public String getImgWithoutExtension() { return this.imageClass.substring(0,this.imageClass.length()-4); }
 
     public String toString(){
-        return " [ComparedImage] ImageName : "+ imageName + " bestMatchImage : " + bestMatchImage + " timePrediction : " + timePrediction + "(ms)";
+        return " [ComparedImage] ImageName : "+ imageName + " bestMatchImage : " + bestMatchImage + " imageClass : " + imageClass + " timePrediction : " + timePrediction + "(ms)";
     }
 }
 
