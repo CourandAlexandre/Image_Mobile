@@ -83,7 +83,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             Log.i(TAG, "Permission wasn't allowed");
             System.out.println(GlobalVariables.debugTag + " onCreate Permission wasn't allowed" );
-
             captureButton.setEnabled(false);
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         }
@@ -123,43 +122,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case Activity.RESULT_OK:
                 switch (requestCode) {
                     case AndroidVariables.captureActivityResult:
-
-                        /** resize **/
-
-                        beginCrop(img.getImageUri());
-
-                        /** resize **/
-
                         System.out.println(GlobalVariables.debugTag + " inCaptureActivityResult ");
-                        photoView.setImageURI(img.getImageUri());
 
-                        Bitmap bitmap = ((BitmapDrawable)photoView.getDrawable()).getBitmap();
-                        File recupImg = SystemTools.convertBitmapToFile(this,bitmap,img.getImageName());
-
-                        img.setImagePath(recupImg.getAbsolutePath());
+                        beginCrop(img.getImageUri());   // resize
+                        photoView.setImageURI(img.getImageUri());   // put into layout
 
                         break;
 
                     case AndroidVariables.libraryActivityResult:
-                        //processPhotoLibrary(intent);
+                        System.out.println(GlobalVariables.debugTag + " inLibraryActivityResult ");
 
                         img.setImageUri(intent.getData());
-                        photoView.setImageURI(img.getImageUri());
+                        beginCrop(img.getImageUri());   // resize
+                        photoView.setImageURI(img.getImageUri());   // put into layout
 
-                        System.out.println(GlobalVariables.debugTag + " LibraryActivityResult img : " + img.toString());
+                        //processPhotoLibrary(intent);
+
                         break;
 
                     case AndroidVariables.analyseActivityResult:
 
                         break;
+
                     case Crop.REQUEST_PICK:
                         beginCrop(intent.getData());
+
                         break;
+
                     case Crop.REQUEST_CROP:
                         handleCrop(resultCode, intent);
+
                         break;
+
                 }
                 break;
+
             case Activity.RESULT_CANCELED :
                 System.out.println(GlobalVariables.debugTag + " onActivityResult : ResultCanceled" );
                 break ;
@@ -233,19 +230,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     // TODO : renvoi Android vers bouton de la marque du bestMatchImage
     protected void startAnalyseActivity()  {
-        // Put the taken photo into cache to be faster if img has been set
-        /*if( !img.getImageUri().equals(null) ){
-            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-            String imagePathExternal = storageDir + "/" + img.getImageName();
+        // Put the taken photo into cache to be faster if img has been set by capture or gallery
+        if ( ! ((BitmapDrawable)photoView.getDrawable()).getBitmap().equals(null)  ){
+            Bitmap bitmap = ((BitmapDrawable)photoView.getDrawable()).getBitmap();
+            File recupImg = SystemTools.convertBitmapToFileAndPutFileInCache(this,bitmap,img.getImageName());
 
-            System.out.println(GlobalVariables.debugTag + " imagePathFrom external dir : " + imagePathExternal);
-
-            File copyTakenPhotoToCache = SystemTools.toCache(this,imagePathExternal,img.getImageName());
-
-            img.setImagePath(copyTakenPhotoToCache.getAbsolutePath());
-
-            System.out.println(GlobalVariables.debugTag + " Img path : " + img.getImagePath() );
-        }*/
+            img.setImagePath(recupImg.getAbsolutePath());   // set the path to the cache reference of the image
+        }
 
         classifierArray = SystemTools.convertCacheToClassifierArray(this);
         System.out.println(GlobalVariables.debugTag + " classifierArray : " + classifierArray.toString());

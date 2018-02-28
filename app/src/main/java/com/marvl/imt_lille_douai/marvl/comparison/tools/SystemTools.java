@@ -172,7 +172,7 @@ public class SystemTools {
         }
     }
 
-    public static File convertBitmapToFile(Context context, Bitmap bitmap, String name){
+    public static File convertBitmapToFileAndPutFileInCache(Context context, Bitmap bitmap, String name){
         String filePath = context.getCacheDir().getAbsolutePath() ;
         File file = new File (filePath, name);
 
