@@ -28,6 +28,7 @@ import org.json.JSONObject;
 public class ServerTools {
 
     ArrayList<File> classifierArray = new ArrayList<>();
+    JSONObject json = null;
 
     public ServerTools(){
         // Default constructor -> non static
@@ -55,7 +56,7 @@ public class ServerTools {
                     @Override
                     public void onResponse(JSONObject response) {
                         System.out.println(GlobalVariables.debugTag + " VolleyResponse : " + response);
-
+                        json = response;
                         //System.out.println(GlobalVariables.debugTag + " : ici : " + response.getJSONArray("vocabulary").toString());
                         getYmlServ(context,cache);
 
@@ -153,4 +154,7 @@ public class ServerTools {
         queue.add(stringRequest);
     }
 
+    public JSONObject getJson() {
+        return json;
+    }
 }

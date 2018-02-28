@@ -49,6 +49,7 @@ import java.util.Date;
 
 import org.bytedeco.javacpp.opencv_ml;
 import org.bytedeco.javacpp.opencv_ml.CvSVM;
+import org.json.JSONException;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -70,6 +71,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     ArrayList<File> classifierArray ;
     CvSVM[] classifiers;
+
+    ComparedImage comparedImage = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -199,11 +202,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     protected void startWebsiteActivity() {
-        Uri uri = Uri.parse("http://www.google.com/#q=fish"); //lance internet
+        Uri uri = null;
+        try {
+            for(int i=0; i<serverTools.getJson().getJSONArray("brands").length(); i++) {
+                System.out.println("aaaaa : " + comparedImage.getImageClass());
+                if(serverTools.getJson().getJSONArray("brands").getJSONObject(i).getString("classifier").equals(comparedImage.getImageClass())){
+                    uri = Uri.parse(serverTools.getJson().getJSONArray("brands").getJSONObject(i).getString("url")); //lance internet
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
 
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-        startActivity(intent);
 
         /* V1
         String bestSimilitudePath= SimilitudeTools.getMostSimilitudeImageComparedToDataBank(photoTakenPath,dataBank);
@@ -245,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         long timePrediction = System.currentTimeMillis();
 
-        ComparedImage comparedImage = SiftTools.doComparison(this, classifierArray, classifiers, img.getImagePath()); // Default ImageBank/TestImage/Pepsi_13.jpg
+        comparedImage = SiftTools.doComparison(this, classifierArray, classifiers, img.getImagePath()); // Default ImageBank/TestImage/Pepsi_13.jpg
 
         comparedImage.setTimePrediction(System.currentTimeMillis() - timePrediction);
 
@@ -253,6 +266,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // Remove tested img from cache after analyse
         SystemTools.clearFileFromCache(this, img.getImageName());
+
+        startWebsiteActivity();
     }
 
     // Create an img file name
