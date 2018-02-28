@@ -100,9 +100,10 @@ public class ServerTools {
 
                         System.out.println(GlobalVariables.debugTag + " getStringServ : " + file.toString());
 
+                        // TODO : Check for remove
                         if(size == fichier+1) {
-                            //findBestTruc(classifierArray, context);
-                            /*System.out.print("AAAA : " + xml);
+                            /*findBestTruc(classifierArray, context);
+                            System.out.print("AAAA : " + xml);
                             classifierArray = SystemTools.convertCacheToClassifierArray(context);
                             System.out.println("AAA : classifierArray " + classifierArray.toString());
 

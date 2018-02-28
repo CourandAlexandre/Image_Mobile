@@ -54,7 +54,7 @@ public class ComparedImage {
     public void setTimePrediction(Long timePrediction) { this.timePrediction = timePrediction; }
 
     public String toString(){
-        return " [ComparedImage] ImageName : "+ imageName + " bestMatchImage : " + bestMatchImage + " timePrediction : " + timePrediction + "(ms)";
+        return " [ComparedImage] ImageName : "+ imageName + " bestMatchImage : " + bestMatchImage + " imageClass : " + imageClass + " timePrediction : " + timePrediction + "(ms)";
     }
 }
 

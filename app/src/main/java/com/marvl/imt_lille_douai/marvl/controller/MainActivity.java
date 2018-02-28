@@ -2,16 +2,13 @@ package com.marvl.imt_lille_douai.marvl.controller;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Path;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -28,7 +25,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
-import com.marvl.imt_lille_douai.marvl.BuildConfig;
 import com.marvl.imt_lille_douai.marvl.R;
 import com.marvl.imt_lille_douai.marvl.comparison.image.ComparedImage;
 import com.marvl.imt_lille_douai.marvl.comparison.image.Img;
@@ -90,8 +86,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         }
 
-        // Clear cache before start
-        SystemTools.clearCache(this);
+        SystemTools.clearCache(this);   // Clear cache before start
 
         prepareAnalyseActivity();
 
@@ -127,6 +122,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     case AndroidVariables.captureActivityResult:
                         System.out.println(GlobalVariables.debugTag + " inCaptureActivityResult ");
 
+                        File originalPhoto = new File(img.getImageUri().getPath());
+                        SystemTools.putFileIntoDeviceGallery(this,originalPhoto);
+
                         beginCrop(img.getImageUri());   // resize
                         photoView.setImageURI(img.getImageUri());   // put into layout
 
@@ -139,11 +137,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         beginCrop(img.getImageUri());   // resize
                         photoView.setImageURI(img.getImageUri());   // put into layout
 
-                        //processPhotoLibrary(intent);
-
                         break;
 
                     case AndroidVariables.analyseActivityResult:
+                        SystemTools.clearFileFromCache(this,img.getImageName());
 
                         break;
 
@@ -205,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Uri uri = null;
         try {
             for(int i=0; i<serverTools.getJson().getJSONArray("brands").length(); i++) {
-                System.out.println("aaaaa : " + comparedImage.getImageClass());
+                System.out.println(GlobalVariables.debugTag + " startWebSiteActivity() | comparedImageClass : " + comparedImage.getImageClass());
                 if(serverTools.getJson().getJSONArray("brands").getJSONObject(i).getString("classifier").equals(comparedImage.getImageClass())){
                     uri = Uri.parse(serverTools.getJson().getJSONArray("brands").getJSONObject(i).getString("url")); //lance internet
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
@@ -244,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // TODO : renvoi Android vers bouton de la marque du bestMatchImage
     protected void startAnalyseActivity()  {
         // Put the taken photo into cache to be faster if img has been set by capture or gallery
-        if ( ! ((BitmapDrawable)photoView.getDrawable()).getBitmap().equals(null)  ){
+        if ( ! ((BitmapDrawable) photoView.getDrawable()).getBitmap().equals(null)  ){
             Bitmap bitmap = ((BitmapDrawable)photoView.getDrawable()).getBitmap();
             File recupImg = SystemTools.convertBitmapToFileAndPutFileInCache(this,bitmap,img.getImageName());
 
@@ -262,6 +259,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         comparedImage.setTimePrediction(System.currentTimeMillis() - timePrediction);
 
+        // Display comparison result in console
         System.out.println(GlobalVariables.debugTag + comparedImage.toString());
 
         // Remove tested img from cache after analyse
@@ -305,26 +303,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return image;
     }
 
-    // TODO
-    private void galleryAddPic(File f) {
+    /* private void galleryAddPic(File f) {
         Log.i(TAG, "TRUUUUC : " + f.getAbsolutePath());
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         Uri contentUri = Uri.fromFile(f);
         mediaScanIntent.setData(img.getImageUri());
         this.sendBroadcast(mediaScanIntent);
-    }
-
-    protected void processPhotoLibrary(Intent intent) {
-        Uri photoUri = intent.getData();
-        String pathToPhoto = GlobalTools.getRealPath(getApplicationContext(), photoUri);
-
-        File pathToFile = new File(pathToPhoto);
-        Bitmap photoBitmap = GlobalTools.decodeFile(pathToFile); // err -> Maybe on path
-
-        photoView.setImageBitmap(photoBitmap);
-
-        Log.i(TAG, pathToPhoto);
-    }
+    } */
 
     protected void setupButtons(){
         captureButton = (Button) findViewById(R.id.captureButton);
