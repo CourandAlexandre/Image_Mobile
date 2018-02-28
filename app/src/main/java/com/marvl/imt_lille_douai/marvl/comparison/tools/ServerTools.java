@@ -2,8 +2,10 @@ package com.marvl.imt_lille_douai.marvl.comparison.tools;
 
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.provider.Settings;
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.android.volley.Cache;
 import com.android.volley.Request;
@@ -11,6 +13,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.DiskBasedCache;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -152,6 +155,24 @@ public class ServerTools {
         );
 
         queue.add(stringRequest);
+    }
+
+    public void getImage(String name, ImageView mImageView, Context context){
+        RequestQueue queue = Volley.newRequestQueue(context);
+        String url = GlobalVariables.serverUrl + "/train-images/" + name;
+        ImageRequest request = new ImageRequest(url,
+                new Response.Listener<Bitmap>() {
+                    @Override
+                    public void onResponse(Bitmap bitmap) {
+                        mImageView.setImageBitmap(bitmap);
+                    }
+                }, 0, 0, null,
+                new Response.ErrorListener() {
+                    public void onErrorResponse(VolleyError error) {
+                        
+                    }
+                });
+        queue.add(request);
     }
 
     public JSONObject getJson() {

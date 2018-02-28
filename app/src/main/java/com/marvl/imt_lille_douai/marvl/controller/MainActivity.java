@@ -21,6 +21,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
@@ -73,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     CvSVM[] classifiers;
 
     ComparedImage comparedImage = null;
+
+    Uri photoCrop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -201,6 +204,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivityForResult(intent, AndroidVariables.libraryActivityResult);
     }
 
+    public void startWebSiteView(){
+        setContentView(R.layout.analyse_layout);
+
+        websiteButton = (Button) findViewById(R.id.websiteButton);
+        websiteButton.setOnClickListener(this);
+
+        TextView textMarqueView = (TextView) findViewById(R.id.textViewAnalyseResult);
+        textMarqueView.setText(comparedImage.getImgWithoutExtension());
+
+        ImageView imageMarqueView = (ImageView) findViewById(R.id.imageWebsite);
+        //imageMarqueView.setImageURI(img.getImageUri());
+
+        try {
+            for(int i=0; i<serverTools.getJson().getJSONArray("brands").length(); i++) {
+                String photoFromServ = serverTools.getJson().getJSONArray("brands").getJSONObject(i).getJSONArray("images").getString(0);
+                serverTools.getImage(photoFromServ,imageMarqueView,this);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     protected void startWebsiteActivity() {
         Uri uri = null;
         try {
@@ -267,7 +292,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Remove tested img from cache after analyse
         SystemTools.clearFileFromCache(this, img.getImageName());
 
-        startWebsiteActivity();
+        //startWebsiteActivity();
+        startWebSiteView();
     }
 
     // Create an img file name

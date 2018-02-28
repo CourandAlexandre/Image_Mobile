@@ -53,6 +53,8 @@ public class ComparedImage {
 
     public void setTimePrediction(Long timePrediction) { this.timePrediction = timePrediction; }
 
+    public String getImgWithoutExtension() { return this.imageClass.substring(0,this.imageClass.length()-4); }
+
     public String toString(){
         return " [ComparedImage] ImageName : "+ imageName + " bestMatchImage : " + bestMatchImage + " timePrediction : " + timePrediction + "(ms)";
     }
