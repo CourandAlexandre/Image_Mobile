@@ -86,7 +86,7 @@ public class SystemTools {
         File[] listOfFiles = cacheDir.listFiles();
 
         for(int i=0 ; i < listOfFiles.length ; i++) {
-            if( !listOfFiles[i].getName().contains("volley") && !listOfFiles[i].getName().contains("yml") && !listOfFiles[i].getName().contains("jpg") ){
+            if( listOfFiles[i].getName().contains(".xml") ){
                 classifierArray.add(listOfFiles[i]);
             }
         }
@@ -96,10 +96,9 @@ public class SystemTools {
 
     public static String getCacheVocabularyPath(Context context) {
         File cacheDir = new File(context.getCacheDir().getAbsolutePath());
-
-        System.out.println(GlobalVariables.debugTag + " cacheDir : " + cacheDir);
-
         File[] listOfFiles = cacheDir.listFiles();
+
+        System.out.println(GlobalVariables.debugTag + " getCacheVocabularyPath() | cacheDir : " + cacheDir);
 
         for(int i=0 ; i < listOfFiles.length ; i++) {
             System.out.println(GlobalVariables.debugTag + "getCacheVocabularyPath() | absolutePath : "+ listOfFiles[i].getAbsolutePath());
@@ -138,7 +137,7 @@ public class SystemTools {
         FileOutputStream output;
         byte[] buffer;
 
-        String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + file.getName() ;
+        String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "Camera/" + file.getName() ;
 
         System.out.println(GlobalVariables.debugTag + " putFileIntoDeviceGAllery() | filePath : " + filePath);
 

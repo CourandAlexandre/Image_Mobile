@@ -9,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -143,6 +144,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         photoView.setImageURI(img.getImageUri());   // put into layout
                         enableAnalyseButton();
 
+                        System.out.println(GlobalVariables.debugTag + " imageChosenPath : " + img.getImageUri().getPath());
+
                         break;
 
                     case AndroidVariables.analyseActivityResult:
@@ -233,6 +236,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try {
             for(int i=0; i<serverTools.getJson().getJSONArray("brands").length(); i++) {
                 System.out.println(GlobalVariables.debugTag + " startWebSiteActivity() | comparedImageClass : " + comparedImage.getImageClass());
+
                 if(serverTools.getJson().getJSONArray("brands").getJSONObject(i).getString("classifier").equals(comparedImage.getImageClass())){
                     uri = Uri.parse(serverTools.getJson().getJSONArray("brands").getJSONObject(i).getString("url")); //lance internet
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
@@ -243,15 +247,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-
-        /* V1
-        String bestSimilitudePath= SimilitudeTools.getMostSimilitudeImageComparedToDataBank(photoTakenPath,dataBank);
-        Log.i("ahah",bestSimilitudePath);
-        setContentView(R.layout.analyse_layout);
-        websiteButton = (Button) findViewById(R.id.websiteButton);
-        websiteButton.setOnClickListener(this);
-         */
     }
 
     protected void prepareAnalyseActivity(){
@@ -268,7 +263,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         serverTools.loadClassifierInCache(this, cache);
     }
 
-    // TODO : renvoi Android vers bouton de la marque du bestMatchImage
     protected void startAnalyseActivity()  {
         // Put the taken photo into cache to be faster if img has been set by capture or gallery
         if ( ! ((BitmapDrawable) photoView.getDrawable()).getBitmap().equals(null)  ){
@@ -276,6 +270,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             File recupImg = SystemTools.convertBitmapToFileAndPutFileInCache(this,bitmap,img.getImageName());
 
             img.setImagePath(recupImg.getAbsolutePath());   // set the path to the cache reference of the image
+
+            System.out.println(GlobalVariables.debugTag + " startAnalyseActivity() | recupImgPath : " + img.getImagePath());
         }
 
         classifierArray = SystemTools.convertCacheToClassifierArray(this);
@@ -316,20 +312,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         System.out.println(GlobalVariables.debugTag + " newFile : " + image.toString());
 
-        //File image = File.createTempFile(imageFileName, ".jpg", storageDir);
-
         // Save a file : path for use with ACTION_VIEW intents
         img.setImageUri(Uri.fromFile(image));
-
-        //galleryAddPic(img);
-
-        //folder stuff
-        /*File imagesFolder = new File(Environment.getExternalStorageDirectory(), "MyImages");
-        imagesFolder.mkdirs();
-
-        File img = new File(Environment.getExternalStorageDirectory(),"fname_" +
-                String.valueOf(System.currentTimeMillis()) + ".jpg");
-        Uri uriSavedImage = Uri.fromFile(img);*/
 
         return image;
     }
