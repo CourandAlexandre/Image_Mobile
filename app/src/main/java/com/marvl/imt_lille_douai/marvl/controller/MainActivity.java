@@ -89,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         }
 
+        analyseButton.setEnabled(false);
+
         SystemTools.clearCache(this);   // Clear cache before start
 
         prepareAnalyseActivity();
@@ -130,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                         beginCrop(img.getImageUri());   // resize
                         photoView.setImageURI(img.getImageUri());   // put into layout
-
+                        enableAnalyseButton();
                         break;
 
                     case AndroidVariables.libraryActivityResult:
@@ -139,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         img.setImageUri(intent.getData());
                         beginCrop(img.getImageUri());   // resize
                         photoView.setImageURI(img.getImageUri());   // put into layout
+                        enableAnalyseButton();
 
                         break;
 
@@ -215,8 +218,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         try {
             for(int i=0; i<serverTools.getJson().getJSONArray("brands").length(); i++) {
-                String photoFromServ = serverTools.getJson().getJSONArray("brands").getJSONObject(i).getJSONArray("images").getString(0);
-                serverTools.getImage(photoFromServ,imageMarqueView,this);
+                if(serverTools.getJson().getJSONArray("brands").getJSONObject(i).getString("classifier").equals(comparedImage.getImageClass())) {
+                    String photoFromServ = serverTools.getJson().getJSONArray("brands").getJSONObject(i).getJSONArray("images").getString(0);
+                    serverTools.getImage(photoFromServ, imageMarqueView, this);
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -359,5 +364,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (resultCode == Crop.RESULT_ERROR) {
             //Toast.makeText(this, Crop.getError(result).getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void enableAnalyseButton() {
+        analyseButton.setEnabled(true);
     }
 }
